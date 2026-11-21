@@ -6,8 +6,10 @@ class Laporan extends BaseController
 {
     public function index()
     {
-        $mulai = $this->request->getGet('mulai') ?? date('Y-m-01');
-        $sampai = $this->request->getGet('sampai') ?? date('Y-m-d');
+        $mulaiRaw = $this->request->getGet('mulai');
+        $sampaiRaw = $this->request->getGet('sampai');
+        $mulai = is_string($mulaiRaw) && $mulaiRaw !== '' ? $mulaiRaw : date('Y-m-01');
+        $sampai = is_string($sampaiRaw) && $sampaiRaw !== '' ? $sampaiRaw : date('Y-m-d');
 
         if (!$this->validTanggal($mulai) || !$this->validTanggal($sampai) || $mulai > $sampai) {
             return redirect()->to('/laporan')->with('error', 'Rentang tanggal laporan tidak valid.');
