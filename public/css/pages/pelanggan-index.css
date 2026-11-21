@@ -1,0 +1,27 @@
+
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; color: #333; }
+        .wadah { max-width: 1000px; margin: auto; }
+        .kepala { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .tombol { display: inline-block; padding: 10px 14px; background: #287a4b; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; }
+        .tombol-ubah { background: #356ac3; }
+        .tombol-nonaktif { background: #b33a3a; }
+        .kotak { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; box-sizing: border-box; }
+        .pencarian { display: flex; gap: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; vertical-align: top; }
+        th { background: #f0f0f0; }
+        .pesan { padding: 12px; background: #e4f5e9; margin-top: 15px; border-radius: 5px; }
+        .pesan-error { background: #fbe5e5; }
+        .aksi { display: flex; gap: 6px; flex-wrap: wrap; }
+        .status { display: flex; gap: 8px; margin-bottom: 15px; }
+        @media (max-width: 650px) {
+            table, tbody, tr, td { display: block; }
+            thead { display: none; }
+            tr { border: 1px solid #ddd; margin-bottom: 15px; padding: 10px; border-radius: 5px; }
+            td { border: none; padding: 6px; }
+            .pencarian { flex-direction: column; }
+        }
+    
+
+body{padding:0!important}
