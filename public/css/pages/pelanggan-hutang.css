@@ -1,0 +1,7 @@
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.page-heading h1{margin:0 0 8px}.page-heading p{margin:0;color:#758178}
+.summary-card,.table-card{background:#fff;border:1px solid #e8eeea;border-radius:12px;padding:22px;margin:18px 0}
+.summary-card span,.summary-card small{display:block;color:#6d7d72}.summary-card strong{display:block;font-size:30px;color:#244534;margin:10px 0}.summary-card small{font-size:12px}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #e4e9e5;text-align:left;white-space:nowrap}th{background:#f4f7f5}
+@media(max-width:760px){.summary-card,.table-card{padding:15px}.summary-card strong{font-size:25px}.page-heading{align-items:flex-start}}
