@@ -38,10 +38,10 @@
         </form>
 
         <table>
-            <thead><tr><th>Nama</th><th>Nomor HP</th><th>Alamat / Keterangan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Nama</th><th>Nomor HP</th><th>Alamat / Keterangan</th><th>Sisa Hutang</th><th>Aksi</th></tr></thead>
             <tbody>
             <?php if (empty($pelanggan)): ?>
-                <tr><td colspan="4">Belum ada data pelanggan.</td></tr>
+                <tr><td colspan="5">Belum ada data pelanggan.</td></tr>
             <?php else: ?>
                 <?php foreach ($pelanggan as $p): ?>
                     <tr>
@@ -50,6 +50,12 @@
                         <td>
                             <?= esc($p['alamat'] ?? '-') ?>
                             <?php if (!empty($p['catatan'])): ?><br><small><?= esc($p['catatan']) ?></small><?php endif ?>
+                        </td>
+                        <td>
+                            <strong>Rp<?= number_format((int) ($p['total_sisa_hutang'] ?? 0), 0, ',', '.') ?></strong>
+                            <?php if ((int) ($p['total_sisa_hutang'] ?? 0) > 0): ?>
+                                <br><a href="<?= site_url('pelanggan/hutang/' . $p['id']) ?>">Rincian hutang</a>
+                            <?php endif ?>
                         </td>
                         <td>
                             <div class="aksi">
