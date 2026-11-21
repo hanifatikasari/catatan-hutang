@@ -91,5 +91,9 @@ $judul = $judul ?? 'Catatan Hutang';
         </button>
 
         <span class="store-badge">Toko Ibu Zulaikhah</span>
+        <form method="post" action="<?= site_url('logout') ?>" style="display:inline-flex; margin:0;">
+            <?= csrf_field() ?>
+            <button type="submit" style="border:1px solid #d5e0d8; background:#fff; color:#31513d; border-radius:9px; padding:8px 12px; font:inherit; font-size:13px; font-weight:600; cursor:pointer;">Keluar</button>
+        </form>
     </div>
 </header>
