@@ -89,6 +89,7 @@ body{padding-top:86px!important}
     <div class="kotak">
         <form action="<?= site_url('pelanggan') ?>" method="get" class="pencarian">
             <input type="hidden" name="status" value="<?= esc($status) ?>">
+            <input type="text" name="cari" value="<?= esc($cari ?? '') ?>" placeholder="Cari nama, nomor HP, atau alamat" aria-label="Cari pelanggan">
             <button type="submit" class="tombol">Cari</button>
             <a href="<?= site_url('pelanggan') ?>" class="tombol tombol-ubah">Bersihkan</a>
         </form>
