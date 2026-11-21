@@ -1,0 +1,11 @@
+
+body{font-family:Arial,sans-serif;background:#f5f5f5;color:#333;margin:0;padding:20px}.wadah{max-width:1100px;margin:auto}
+.kotak{background:#fff;padding:20px;border-radius:8px;margin:16px 0}.filter{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+label{display:block;margin-bottom:6px;font-weight:bold}input{padding:10px;border:1px solid #ccc;border-radius:5px}
+.tombol{display:inline-block;background:#287a4b;color:#fff;border:0;border-radius:5px;padding:10px 14px;text-decoration:none;cursor:pointer}
+.ringkasan{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.angka{font-size:22px;font-weight:bold;margin-top:8px}
+table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+@media(max-width:700px){table,tbody,tr,td{display:block}thead{display:none}tr{border:1px solid #ddd;margin-bottom:12px;padding:8px}td{border:0}}
+
+
+body{padding:0!important}
