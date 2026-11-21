@@ -32,6 +32,8 @@ $routes->group('utang', static function ($routes) {
     $routes->get('tambah', 'Utang::tambah');
     $routes->post('simpan', 'Utang::simpan');
     $routes->get('detail/(:num)', 'Utang::detail/$1');
+    $routes->get('edit/(:num)', 'Utang::edit/$1');
+    $routes->post('perbarui/(:num)', 'Utang::perbarui/$1');
     $routes->post('bayar/(:num)', 'Utang::bayar/$1');
     $routes->post('batalkan/(:num)', 'Utang::batalkan/$1');
 });
