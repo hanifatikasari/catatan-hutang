@@ -1,0 +1,13 @@
+/* Print stylesheet for the date-filtered receivables report. */
+@media print {
+    @page { size: A4 landscape; margin: 12mm; }
+    body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+    .app-sidebar, .app-topbar, .filter, .tombol, .report-actions, script { display: none !important; }
+    .wadah { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+    .kotak, .ringkasan .kotak { border: 1px solid #bbb !important; box-shadow: none !important; background: #fff !important; break-inside: avoid; }
+    .ringkasan { grid-template-columns: repeat(4, 1fr) !important; }
+    table { width: 100% !important; border-collapse: collapse !important; font-size: 10pt; }
+    th, td { border: 1px solid #777 !important; padding: 6px !important; color: #000 !important; }
+    a { color: #000 !important; text-decoration: none !important; }
+    h1, h2 { color: #000 !important; }
+}
