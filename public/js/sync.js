@@ -188,8 +188,7 @@ const SyncManager = (function () {
                 return;
             }
 
-            const csrfToken = getCsrfToken();
-            if (!csrfToken) {
+            if (!getCsrfToken()) {
                 throw new Error('Token keamanan tidak tersedia. Muat ulang halaman saat online, lalu coba sinkronkan lagi.');
             }
 
@@ -204,7 +203,7 @@ const SyncManager = (function () {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': csrfToken
+                        'X-CSRF-TOKEN': getCsrfToken()
                     },
                     body: JSON.stringify({ items: batch })
                 });
