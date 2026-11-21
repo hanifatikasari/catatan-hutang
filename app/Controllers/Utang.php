@@ -458,7 +458,18 @@ class Utang extends BaseController
                 'success' => false,
                 'message' => 'Tidak ada transaksi offline yang dikirim.',
                 'synced' => [],
+                'errors' => [],
             ])->setStatusCode(400);
+        }
+
+        // Keep requests bounded; the client sends queue batches.
+        if (count($items) > 50) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Maksimal 50 transaksi per proses sinkronisasi.',
+                'synced' => [],
+                'errors' => [],
+            ])->setStatusCode(413);
         }
 
         $db = db_connect();
@@ -466,46 +477,93 @@ class Utang extends BaseController
         $errors = [];
 
         foreach ($items as $item) {
-            $localId = $item['local_id'] ?? null;
+            if (!is_array($item)) {
+                $errors[] = 'Format transaksi offline tidak valid.';
+                continue;
+            }
+
+            $localId = trim((string) ($item['local_id'] ?? ''));
+            if ($localId === '' || strlen($localId) > 80 || !preg_match('/^OFFLINE-[A-Za-z0-9-]+$/', $localId)) {
+                $errors[] = 'ID transaksi offline tidak valid.';
+                continue;
+            }
+
+            // Idempotency: an already stored local ID is acknowledged, not inserted again.
+            $existing = $db->table('utang')->where('offline_id', $localId)->get()->getRowArray();
+            if ($existing) {
+                $totalRow = $db->table('rincian_utang')->selectSum('total_harga', 'total_hutang')->where('utang_id', $existing['id'])->get()->getRowArray();
+                $paidRow = $db->table('pembayaran')->selectSum('jumlah_bayar', 'total_bayar')->where('utang_id', $existing['id'])->get()->getRowArray();
+                $total = (int) ($totalRow['total_hutang'] ?? 0);
+                $paid = (int) ($paidRow['total_bayar'] ?? 0);
+                $synced[] = [
+                    'local_id' => $localId,
+                    'server_id' => (int) $existing['id'],
+                    'nomor_transaksi' => $existing['nomor_transaksi'],
+                    'nama_pelanggan' => '',
+                    'tanggal_utang' => $existing['tanggal_utang'],
+                    'total_hutang' => $total,
+                    'total_bayar' => $paid,
+                    'sisa_hutang' => max(0, $total - $paid),
+                    'already_synced' => true,
+                ];
+                continue;
+            }
+
             $pelangganId = (int) ($item['pelanggan_id'] ?? 0);
             $pelanggan = $this->pelangganModel->find($pelangganId);
-
             if (!$pelanggan || (int) $pelanggan['aktif'] !== 1) {
                 $errors[] = "Pelanggan tidak valid untuk transaksi {$localId}.";
                 continue;
             }
 
             $tanggal = trim((string) ($item['tanggal_utang'] ?? ''));
-            $jatuhTempo = trim((string) ($item['tanggal_jatuh_tempo'] ?? ''));
-            $catatan = trim((string) ($item['catatan'] ?? ''));
-
-            $timestampUtang = $tanggal !== '' ? strtotime($tanggal) : time();
+            $timestampUtang = $tanggal !== '' ? strtotime($tanggal) : false;
             if ($timestampUtang === false) {
-                $timestampUtang = time();
+                $errors[] = "Tanggal transaksi tidak valid untuk {$localId}.";
+                continue;
+            }
+
+            $jatuhTempo = trim((string) ($item['tanggal_jatuh_tempo'] ?? ''));
+            if ($jatuhTempo !== '') {
+                $dateTempo = \DateTime::createFromFormat('!Y-m-d', $jatuhTempo);
+                if (!$dateTempo || $dateTempo->format('Y-m-d') !== $jatuhTempo) {
+                    $errors[] = "Tanggal jatuh tempo tidak valid untuk {$localId}.";
+                    continue;
+                }
+            }
+
+            $catatan = trim((string) ($item['catatan'] ?? ''));
+            if (mb_strlen($catatan) > 255) {
+                $errors[] = "Catatan terlalu panjang untuk transaksi {$localId}.";
+                continue;
             }
 
             $rincianRaw = $item['rincian'] ?? [];
-            if (!is_array($rincianRaw) || empty($rincianRaw)) {
-                $errors[] = "Rincian barang kosong untuk transaksi {$localId}.";
+            if (!is_array($rincianRaw) || empty($rincianRaw) || count($rincianRaw) > 100) {
+                $errors[] = "Rincian barang tidak valid untuk transaksi {$localId}.";
                 continue;
             }
 
             $rincian = [];
             $totalHutang = 0;
+            foreach ($rincianRaw as $baris) {
+                if (!is_array($baris)) {
+                    continue;
+                }
+                $nama = trim((string) ($baris['nama_barang'] ?? ''));
+                $qty = (float) ($baris['jumlah'] ?? 0);
+                $unit = trim((string) ($baris['satuan'] ?? 'pcs'));
+                $hargaSatuan = filter_var($baris['harga_satuan'] ?? null, FILTER_VALIDATE_INT);
 
-            foreach ($rincianRaw as $b) {
-                $nama = trim((string) ($b['nama_barang'] ?? ''));
-                $qty = (float) ($b['jumlah'] ?? 0);
-                $unit = trim((string) ($b['satuan'] ?? 'pcs'));
-                $hargaSatuan = (int) ($b['harga_satuan'] ?? 0);
-
-                if ($nama === '' || $qty <= 0 || $hargaSatuan < 0) {
+                if ($nama === '' || mb_strlen($nama) > 100 || $qty <= 0 || $qty > 100000 || $hargaSatuan === false || $hargaSatuan < 0 || $hargaSatuan > 1000000000 || mb_strlen($unit) > 20) {
                     continue;
                 }
 
                 $subtotal = (int) round($qty * $hargaSatuan);
+                if ($subtotal <= 0) {
+                    continue;
+                }
                 $totalHutang += $subtotal;
-
                 $rincian[] = [
                     'nama_barang' => $nama,
                     'jumlah' => $qty,
@@ -521,12 +579,12 @@ class Utang extends BaseController
             }
 
             $db->transBegin();
-
             $nomor = 'HTG-' . date('ymd', $timestampUtang) . '-' . strtoupper(bin2hex(random_bytes(3)));
 
             $utangId = $this->utangModel->insert([
                 'pelanggan_id' => $pelangganId,
                 'nomor_transaksi' => $nomor,
+                'offline_id' => $localId,
                 'tanggal_utang' => date('Y-m-d H:i:s', $timestampUtang),
                 'tanggal_jatuh_tempo' => $jatuhTempo !== '' ? $jatuhTempo : null,
                 'catatan' => $catatan !== '' ? $catatan : null,
@@ -536,28 +594,47 @@ class Utang extends BaseController
 
             if (!$utangId) {
                 $db->transRollback();
-                $errors[] = "Gagal menyimpan transaksi {$localId}.";
+
+                // A simultaneous retry may have inserted the unique offline_id.
+                $existing = $db->table('utang')->where('offline_id', $localId)->get()->getRowArray();
+                if ($existing) {
+                    $synced[] = [
+                        'local_id' => $localId,
+                        'server_id' => (int) $existing['id'],
+                        'nomor_transaksi' => $existing['nomor_transaksi'],
+                        'nama_pelanggan' => $pelanggan['nama'],
+                        'tanggal_utang' => $existing['tanggal_utang'],
+                        'total_hutang' => $totalHutang,
+                        'total_bayar' => 0,
+                        'sisa_hutang' => $totalHutang,
+                        'already_synced' => true,
+                    ];
+                } else {
+                    $errors[] = "Gagal menyimpan transaksi {$localId}.";
+                }
                 continue;
             }
 
-            foreach ($rincian as &$baris) {
-                $baris['utang_id'] = $utangId;
+            foreach ($rincian as &$detail) {
+                $detail['utang_id'] = $utangId;
             }
-            unset($baris);
+            unset($detail);
 
-            $this->rincianModel->insertBatch($rincian);
-
-            if ($db->transStatus() === false) {
+            $detailSaved = $this->rincianModel->insertBatch($rincian);
+            if (!$detailSaved || $db->transStatus() === false) {
                 $db->transRollback();
-                $errors[] = "Gagal menyimpan rincian barang untuk transaksi {$localId}.";
+                $errors[] = "Gagal menyimpan rincian transaksi {$localId}.";
                 continue;
             }
 
-            $db->transCommit();
+            if ($db->transCommit() === false) {
+                $errors[] = "Transaksi {$localId} belum dapat dipastikan tersimpan. Sinkronisasi ulang aman dilakukan.";
+                continue;
+            }
 
             $synced[] = [
                 'local_id' => $localId,
-                'server_id' => $utangId,
+                'server_id' => (int) $utangId,
                 'nomor_transaksi' => $nomor,
                 'nama_pelanggan' => $pelanggan['nama'],
                 'tanggal_utang' => date('Y-m-d H:i:s', $timestampUtang),
@@ -575,4 +652,5 @@ class Utang extends BaseController
             'message' => count($synced) . ' transaksi offline berhasil disinkronkan ke server.',
         ]);
     }
+
 }
