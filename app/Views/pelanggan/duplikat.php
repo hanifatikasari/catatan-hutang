@@ -6,6 +6,7 @@
     <title>Nama Pelanggan Sudah Tercatat</title>
     <link rel="stylesheet" href="<?= base_url('css/layout.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
+    <?= $this->include('layouts/partials/pwa_meta') ?>
 </head>
 <body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'pelanggan', 'judul' => 'Konfirmasi Nama Pelanggan']) ?>
@@ -84,6 +85,8 @@
     </div>
 </main>
 
+<script src="<?= base_url('js/db.js') ?>"></script>
+<script src="<?= base_url('js/sync.js') ?>"></script>
 <script src="<?= base_url('js/app.js') ?>"></script>
 </body>
 </html>

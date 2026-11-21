@@ -42,6 +42,12 @@ $judul = $judul ?? 'Catatan Hutang';
         </a>
     </nav>
 
+    <div class="sidebar-pwa-action" style="padding: 10px 8px 0;">
+        <button type="button" class="btn-install-pwa sidebar-install-btn" style="display: none;">
+            📲 Install Aplikasi ke HP
+        </button>
+    </div>
+
     <div class="app-sidebar-foot">
         <div class="app-sidebar-foot-title">Toko Ibu Zulaikhah</div>
         <div class="app-sidebar-foot-desc">Pencatatan • Pembayaran • Piutang</div>
@@ -63,6 +69,27 @@ $judul = $judul ?? 'Catatan Hutang';
         </div>
     </div>
     <div class="app-topbar-right">
+        <!-- Install PWA Button on Topbar -->
+        <button type="button" class="btn-install-pwa topbar-install-btn" style="display: none;" title="Pasang aplikasi di layar utama HP">
+            📲 Pasang Aplikasi
+        </button>
+
+        <!-- Status Koneksi PWA (Online / Offline) -->
+        <div class="status-pill-online" id="connectionStatusBadge" title="Status koneksi internet">
+            <span class="status-indicator-dot online"></span>
+            <span class="status-text">Online</span>
+        </div>
+
+        <!-- Antrean Transaksi Offline -->
+        <span id="syncQueueBadge" class="sync-queue-badge" style="display: none;" title="Transaksi offline yang belum dikirim ke server">
+            ⏳ 0 Antrean
+        </span>
+
+        <!-- Tombol Sinkronisasi Manual -->
+        <button type="button" id="manualSyncBtn" class="btn-manual-sync" style="display: none;" onclick="window.SyncManager && window.SyncManager.syncPendingTransactions(true)" title="Kirim data offline ke server sekarang">
+            🔄 Sinkronkan
+        </button>
+
         <span class="store-badge">Toko Ibu Zulaikhah</span>
     </div>
 </header>

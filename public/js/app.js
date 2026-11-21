@@ -79,3 +79,26 @@ document.addEventListener('wheel', function (event) {
         initSidebar();
     }
 })();
+
+// Ensure PWA and IndexedDB scripts are always loaded
+(function () {
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    if (!window.AppDB) {
+        loadScript('/js/db.js').then(() => {
+            if (!window.SyncManager) {
+                return loadScript('/js/sync.js');
+            }
+        }).catch(err => console.warn('Failed loading PWA scripts dynamically:', err));
+    } else if (!window.SyncManager) {
+        loadScript('/js/sync.js').catch(err => console.warn('Failed loading sync.js dynamically:', err));
+    }
+})();

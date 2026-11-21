@@ -36,6 +36,8 @@ $routes->group('utang', static function ($routes) {
     $routes->post('perbarui/(:num)', 'Utang::perbarui/$1');
     $routes->post('bayar/(:num)', 'Utang::bayar/$1');
     $routes->post('batalkan/(:num)', 'Utang::batalkan/$1');
+    $routes->get('data-offline', 'Utang::dataOffline');
+    $routes->post('sinkronisasi-offline', 'Utang::sinkronisasiOffline');
 });
 
 $routes->get('laporan', 'Laporan::index');

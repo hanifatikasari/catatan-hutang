@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="<?= base_url('css/layout.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/pages/utang-form.css') ?>">
+    <?= $this->include('layouts/partials/pwa_meta') ?>
 </head>
 <body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'utang', 'judul' => $judul]) ?>
@@ -101,6 +102,8 @@ function tambahBarang() {
     container.appendChild(div);
 }
 </script>
+<script src="<?= base_url('js/db.js') ?>"></script>
+<script src="<?= base_url('js/sync.js') ?>"></script>
 <script src="<?= base_url('js/app.js') ?>"></script>
 </body>
 </html>

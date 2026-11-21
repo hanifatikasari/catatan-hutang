@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mode Offline - Catatan Hutang</title>
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <style>
+        .offline-container {
+            max-width: 680px;
+            margin: 40px auto;
+            padding: 24px;
+            text-align: center;
+        }
+        .offline-icon {
+            font-size: 54px;
+            margin-bottom: 14px;
+            line-height: 1;
+        }
+        .offline-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #173b2b;
+            margin: 0 0 8px;
+        }
+        .offline-desc {
+            font-size: 15px;
+            color: #617568;
+            margin: 0 0 28px;
+            line-height: 1.6;
+        }
+        .offline-card {
+            background: #ffffff;
+            border: 1px solid #dce8e0;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(20, 50, 35, 0.05);
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .offline-card h2 {
+            font-size: 17px;
+            color: #1c3c2d;
+            margin: 0 0 12px;
+        }
+        .offline-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .offline-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+            background: #f7faf8;
+            border: 1px solid #e2ece6;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #1a3c2c;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease;
+        }
+        .offline-nav-item:hover {
+            background: #edf5f0;
+            border-color: #72a787;
+        }
+        .offline-nav-item span {
+            font-size: 20px;
+        }
+        .offline-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        @media (max-width: 520px) {
+            .offline-nav-grid {
+                grid-template-columns: 1fr;
+            }
+            .offline-container {
+                margin: 20px auto;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body style="background: #f4f7f5;">
+    <div class="offline-container">
+        <div class="offline-status-badge">
+            <span class="pulse-dot"></span> Tidak Ada Koneksi Internet
+        </div>
+        <div class="offline-icon">📡</div>
+        <h1 class="offline-title">Anda Sedang Berada di Mode Offline</h1>
+        <p class="offline-desc">
+            Koneksi internet terputus, namun aplikasi Catatan Hutang tetap dapat digunakan! Anda tetap bisa melihat data yang tersimpan di perangkat dan mencatat transaksi baru secara lokal.
+        </p>
+
+        <div class="offline-card">
+            <h2>Halaman & Data yang Tersedia Offline:</h2>
+            <div class="offline-nav-grid">
+                <a href="/utang" class="offline-nav-item">
+                    <span>📝</span>
+                    <div>
+                        <div>Catatan Hutang</div>
+                        <small style="color: #6d7d72; font-weight: normal;">Data tersimpan</small>
+                    </div>
+                </a>
+                <a href="/utang/tambah" class="offline-nav-item">
+                    <span>➕</span>
+                    <div>
+                        <div>Catat Hutang Baru</div>
+                        <small style="color: #6d7d72; font-weight: normal;">Simpan ke antrean lokal</small>
+                    </div>
+                </a>
+                <a href="/pelanggan" class="offline-nav-item">
+                    <span>👥</span>
+                    <div>
+                        <div>Daftar Pelanggan</div>
+                        <small style="color: #6d7d72; font-weight: normal;">Data tersimpan</small>
+                    </div>
+                </a>
+                <a href="/" class="offline-nav-item">
+                    <span>⌂</span>
+                    <div>
+                        <div>Dashboard Utama</div>
+                        <small style="color: #6d7d72; font-weight: normal;">Ikhtisar ringkas</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="tombol" onclick="window.location.reload()">
+                🔄 Coba Muat Ulang Sekarang
+            </button>
+            <a href="/" class="tombol secondary">
+                Kembali ke Beranda
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Automatic reload when back online
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

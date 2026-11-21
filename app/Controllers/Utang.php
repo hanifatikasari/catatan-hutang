@@ -411,4 +411,168 @@ class Utang extends BaseController
         return redirect()->to('/utang')->with('success', 'Transaksi hutang berhasil dibatalkan.');
     }
 
+    public function dataOffline()
+    {
+        $db = db_connect();
+
+        $pelanggan = $db->table('pelanggan p')
+            ->select("p.*,
+                (SELECT COALESCE(SUM(GREATEST(0,
+                    (SELECT COALESCE(SUM(r.total_harga), 0) FROM rincian_utang r WHERE r.utang_id = u.id) -
+                    (SELECT COALESCE(SUM(b.jumlah_bayar), 0) FROM pembayaran b WHERE b.utang_id = u.id)
+                )), 0) FROM utang u WHERE u.pelanggan_id = p.id AND u.dibatalkan = 0) AS total_sisa_hutang")
+            ->where('p.aktif', 1)
+            ->orderBy('p.nama', 'ASC')
+            ->get()->getResultArray();
+
+        $utang = $db->table('utang u')
+            ->select("u.*, p.nama AS nama_pelanggan,
+                (SELECT COALESCE(SUM(r.total_harga), 0) FROM rincian_utang r WHERE r.utang_id = u.id) AS total_hutang,
+                (SELECT COALESCE(SUM(b.jumlah_bayar), 0) FROM pembayaran b WHERE b.utang_id = u.id) AS total_bayar")
+            ->join('pelanggan p', 'p.id = u.pelanggan_id')
+            ->where('u.dibatalkan', 0)
+            ->orderBy('u.tanggal_utang', 'DESC')
+            ->limit(150)
+            ->get()->getResultArray();
+
+        foreach ($utang as &$item) {
+            $item['sisa_hutang'] = max(0, (int) $item['total_hutang'] - (int) $item['total_bayar']);
+        }
+        unset($item);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'pelanggan' => $pelanggan,
+            'utang' => $utang,
+            'timestamp' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public function sinkronisasiOffline()
+    {
+        $raw = $this->request->getJSON(true) ?? $this->request->getPost();
+        $items = $raw['items'] ?? $raw['transaksi'] ?? [];
+
+        if (!is_array($items) || empty($items)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Tidak ada transaksi offline yang dikirim.',
+                'synced' => [],
+            ])->setStatusCode(400);
+        }
+
+        $db = db_connect();
+        $synced = [];
+        $errors = [];
+
+        foreach ($items as $item) {
+            $localId = $item['local_id'] ?? null;
+            $pelangganId = (int) ($item['pelanggan_id'] ?? 0);
+            $pelanggan = $this->pelangganModel->find($pelangganId);
+
+            if (!$pelanggan || (int) $pelanggan['aktif'] !== 1) {
+                $errors[] = "Pelanggan tidak valid untuk transaksi {$localId}.";
+                continue;
+            }
+
+            $tanggal = trim((string) ($item['tanggal_utang'] ?? ''));
+            $jatuhTempo = trim((string) ($item['tanggal_jatuh_tempo'] ?? ''));
+            $catatan = trim((string) ($item['catatan'] ?? ''));
+
+            $timestampUtang = $tanggal !== '' ? strtotime($tanggal) : time();
+            if ($timestampUtang === false) {
+                $timestampUtang = time();
+            }
+
+            $rincianRaw = $item['rincian'] ?? [];
+            if (!is_array($rincianRaw) || empty($rincianRaw)) {
+                $errors[] = "Rincian barang kosong untuk transaksi {$localId}.";
+                continue;
+            }
+
+            $rincian = [];
+            $totalHutang = 0;
+
+            foreach ($rincianRaw as $b) {
+                $nama = trim((string) ($b['nama_barang'] ?? ''));
+                $qty = (float) ($b['jumlah'] ?? 0);
+                $unit = trim((string) ($b['satuan'] ?? 'pcs'));
+                $hargaSatuan = (int) ($b['harga_satuan'] ?? 0);
+
+                if ($nama === '' || $qty <= 0 || $hargaSatuan < 0) {
+                    continue;
+                }
+
+                $subtotal = (int) round($qty * $hargaSatuan);
+                $totalHutang += $subtotal;
+
+                $rincian[] = [
+                    'nama_barang' => $nama,
+                    'jumlah' => $qty,
+                    'satuan' => $unit !== '' ? $unit : 'pcs',
+                    'harga_satuan' => $hargaSatuan,
+                    'total_harga' => $subtotal,
+                ];
+            }
+
+            if (empty($rincian) || $totalHutang <= 0) {
+                $errors[] = "Total hutang tidak valid untuk transaksi {$localId}.";
+                continue;
+            }
+
+            $db->transBegin();
+
+            $nomor = 'HTG-' . date('ymd', $timestampUtang) . '-' . strtoupper(bin2hex(random_bytes(3)));
+
+            $utangId = $this->utangModel->insert([
+                'pelanggan_id' => $pelangganId,
+                'nomor_transaksi' => $nomor,
+                'tanggal_utang' => date('Y-m-d H:i:s', $timestampUtang),
+                'tanggal_jatuh_tempo' => $jatuhTempo !== '' ? $jatuhTempo : null,
+                'catatan' => $catatan !== '' ? $catatan : null,
+                'dibatalkan' => 0,
+                'alasan_batal' => null,
+            ], true);
+
+            if (!$utangId) {
+                $db->transRollback();
+                $errors[] = "Gagal menyimpan transaksi {$localId}.";
+                continue;
+            }
+
+            foreach ($rincian as &$baris) {
+                $baris['utang_id'] = $utangId;
+            }
+            unset($baris);
+
+            $this->rincianModel->insertBatch($rincian);
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                $errors[] = "Gagal menyimpan rincian barang untuk transaksi {$localId}.";
+                continue;
+            }
+
+            $db->transCommit();
+
+            $synced[] = [
+                'local_id' => $localId,
+                'server_id' => $utangId,
+                'nomor_transaksi' => $nomor,
+                'nama_pelanggan' => $pelanggan['nama'],
+                'tanggal_utang' => date('Y-m-d H:i:s', $timestampUtang),
+                'total_hutang' => $totalHutang,
+                'total_bayar' => 0,
+                'sisa_hutang' => $totalHutang,
+            ];
+        }
+
+        return $this->response->setJSON([
+            'success' => count($synced) > 0,
+            'synced_count' => count($synced),
+            'synced' => $synced,
+            'errors' => $errors,
+            'message' => count($synced) . ' transaksi offline berhasil disinkronkan ke server.',
+        ]);
+    }
 }
