@@ -1,0 +1,6 @@
+/* Global utilities shared by all pages */
+.pesan,.alert{padding:12px;border-radius:6px;margin:12px 0;background:#e4f5e9;color:#28583a}
+.pesan-error,.error{background:#fbe5e5;color:#8d2929}
+.tombol{display:inline-block;padding:10px 14px;background:#287a4b;color:#fff;text-decoration:none;border:0;border-radius:5px;cursor:pointer}
+.tombol:hover{filter:brightness(.96)}
+.tombol-ubah{background:#356ac3}.tombol-nonaktif{background:#b33a3a}.tombol-kembali,.secondary{background:#777}
