@@ -272,5 +272,37 @@ class Pelanggan extends BaseController
             ->with('success', 'Pelanggan baru berhasil ditambahkan.');
     }
 
-}
+    // Menampilkan ringkasan seluruh transaksi hutang milik pelanggan.
+    public function hutang($id)
+    {
+        $pelanggan = $this->pelangganModel->find($id);
+        if (!$pelanggan) {
+            return redirect()->to('/pelanggan')->with('error', 'Data pelanggan tidak ditemukan.');
+        }
 
+        $utang = db_connect()->table('utang u')
+            ->select("u.id, u.nomor_transaksi, u.tanggal_utang, u.tanggal_jatuh_tempo, u.dibatalkan,
+                (SELECT COALESCE(SUM(r.total_harga), 0) FROM rincian_utang r WHERE r.utang_id = u.id) AS total_hutang,
+                (SELECT COALESCE(SUM(b.jumlah_bayar), 0) FROM pembayaran b WHERE b.utang_id = u.id) AS total_bayar")
+            ->where('u.pelanggan_id', $id)
+            ->orderBy('u.tanggal_utang', 'DESC')
+            ->get()->getResultArray();
+
+        $totalSisa = 0;
+        foreach ($utang as &$transaksi) {
+            $transaksi['sisa_hutang'] = (int) $transaksi['dibatalkan'] === 1
+                ? 0
+                : max(0, (int) $transaksi['total_hutang'] - (int) $transaksi['total_bayar']);
+            $totalSisa += $transaksi['sisa_hutang'];
+        }
+        unset($transaksi);
+
+        return view('pelanggan/hutang', [
+            'judul' => 'Ringkasan Hutang Pelanggan',
+            'pelanggan' => $pelanggan,
+            'utang' => $utang,
+            'totalSisa' => $totalSisa,
+        ]);
+    }
+
+}
