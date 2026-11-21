@@ -67,3 +67,21 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 - json (enabled by default - don't turn it off)
 - [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
 - [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+
+
+## Backup, restore, dan cetak laporan
+
+Pada branch feature/report-backup-restore tersedia menu cetak laporan serta backup/restore database.
+
+- Cetak laporan: buka menu Laporan, pilih rentang tanggal, lalu klik Cetak / Simpan PDF. Pada dialog browser pilih printer atau Save as PDF.
+- Password backup: tambahkan password khusus minimal 16 karakter ke file .env lokal (file ini tidak di-commit):
+
+  ```dotenv
+  BACKUP_RESTORE_PASSWORD = "buat-password-panjang-dan-rahasia"
+  ```
+
+- Backup: menu Backup & Restore menyediakan unduhan SQL dari struktur dan isi database.
+- Restore: unggah file SQL hasil backup aplikasi. Restore mengganti data tabel; aplikasi menyimpan backup pengaman sebelum pemulihan di writable/backups/before_restore_latest.sql.
+- Akses: password diperlukan untuk membuka menu selama 15 menit. Restore dibatasi ke perintah DROP/CREATE/INSERT untuk tabel yang sudah ada di database dan dilindungi CSRF.
+
+Sebelum mencoba restore, lakukan backup dan uji terlebih dahulu pada database salinan. Backup berisi data pelanggan dan transaksi, jadi simpan file secara privat. Fitur ini menggunakan MySQLi dan database utility CodeIgniter 4.
