@@ -85,3 +85,28 @@ Pada branch feature/report-backup-restore tersedia menu cetak laporan serta back
 - Akses: password diperlukan untuk membuka menu selama 15 menit. Restore dibatasi ke perintah DROP/CREATE/INSERT untuk tabel yang sudah ada di database dan dilindungi CSRF.
 
 Sebelum mencoba restore, lakukan backup dan uji terlebih dahulu pada database salinan. Backup berisi data pelanggan dan transaksi, jadi simpan file secara privat. Fitur backup menggunakan generator SQL berbasis MySQLi karena metode backup bawaan Database Utilities CI4 belum diimplementasikan untuk driver MySQLi. Dump mencakup struktur tabel dan data; view, trigger, procedure, dan event database tidak termasuk.
+
+
+## PWA dan transaksi offline
+
+Branch `feature/pwa-dasar` menambahkan manifest, ikon aplikasi, service worker, halaman fallback offline, cache data pelanggan/transaksi ke IndexedDB, serta antrean transaksi hutang yang dibuat saat perangkat offline.
+
+Sebelum menggunakan sinkronisasi offline, jalankan migration `AddOfflineSyncIdToUtang` pada database aplikasi:
+
+```bash
+php spark migrate
+```
+
+Migration menambahkan kolom nullable `utang.offline_id` dengan unique index. Kolom ini dipakai sebagai idempotency key agar pengiriman ulang transaksi lokal yang sama tidak membuat transaksi server duplikat. Pastikan migration sudah diterapkan pada database lokal dan database hosting sebelum mengaktifkan input offline.
+
+Jika hosting tidak menyediakan terminal, terapkan perubahan skema yang sama melalui phpMyAdmin:
+
+```sql
+ALTER TABLE `utang`
+    ADD `offline_id` VARCHAR(80) NULL DEFAULT NULL AFTER `nomor_transaksi`;
+
+CREATE UNIQUE INDEX `utang_offline_id_unique`
+    ON `utang` (`offline_id`);
+```
+
+Catatan: data pelanggan dan maksimal 150 transaksi terbaru disimpan pada perangkat yang pernah memuat data saat online. Data offline tidak langsung tersedia di perangkat lain sampai berhasil disinkronkan. Browser perlu mendukung Service Worker dan IndexedDB, serta website harus diakses melalui HTTPS (localhost untuk pengembangan). Backup perangkat dan server tetap perlu dilakukan; cache offline bukan pengganti backup.
