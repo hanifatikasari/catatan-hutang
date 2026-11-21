@@ -14,6 +14,7 @@ class UtangModel extends Model
     protected $allowedFields = [
         'pelanggan_id',
         'nomor_transaksi',
+        'offline_id',
         'tanggal_utang',
         'tanggal_jatuh_tempo',
         'catatan',
