@@ -1,12 +1,94 @@
+/* Utang Form & Edit Stylesheet */
 
-body{font-family:Arial,sans-serif;background:#f5f5f5;color:#333;margin:0;padding:20px}
-.wadah{max-width:850px;margin:auto}.kotak{background:#fff;padding:22px;border-radius:8px;margin-top:20px}
-label{display:block;font-weight:bold;margin:12px 0 6px}input,select,textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccc;border-radius:5px}
-.barang{border:1px solid #ddd;border-radius:8px;padding:14px;margin:12px 0}
-.grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}
-.tombol{display:inline-block;background:#287a4b;color:#fff;border:0;border-radius:5px;padding:10px 14px;text-decoration:none;cursor:pointer;margin-top:12px}
-.secondary{background:#777}.alert{padding:12px;background:#fbe5e5;border-radius:5px}
-@media(max-width:650px){.grid{grid-template-columns:1fr 1fr}.grid .full{grid-column:1/-1}}
+.form-page-header {
+    margin-bottom: 20px;
+}
 
+.form-page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #173b2b;
+    margin: 0 0 6px;
+}
 
-body{padding:0!important}
+.form-page-header .sub-text {
+    font-size: 13.5px;
+    color: #63776b;
+    margin: 0;
+}
+
+.form-dates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 12px 0;
+}
+
+.barang {
+    background: #fbfdfc;
+    border: 1px solid #dce8e1;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 14px 0;
+    position: relative;
+}
+
+.barang .grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 12px;
+}
+
+.barang .grid .full {
+    grid-column: 1 / -1;
+}
+
+.btn-hapus-barang {
+    margin-top: 10px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .barang .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .barang .grid .full {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 520px) {
+    .form-dates-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .barang {
+        padding: 12px;
+    }
+
+    .barang .grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .barang .grid .col-xs-full {
+        grid-column: 1 / -1;
+    }
+}

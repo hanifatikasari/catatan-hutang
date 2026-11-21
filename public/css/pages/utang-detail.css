@@ -1,7 +1,226 @@
+/* Utang Detail Stylesheet */
 
-body{font-family:Arial,sans-serif;background:#f5f5f5;color:#333;margin:0;padding:20px}.wadah{max-width:900px;margin:auto}.kotak{background:#fff;padding:20px;border-radius:8px;margin:16px 0}
-table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
-.tombol{display:inline-block;background:#287a4b;color:white;text-decoration:none;padding:10px 14px;border-radius:5px}
+.detail-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
 
+.detail-page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #173b2b;
+    margin: 0 0 6px;
+}
 
-body{padding:0!important}
+.detail-page-header .sub-text {
+    font-size: 13.5px;
+    color: #63776b;
+    margin: 0;
+}
+
+.detail-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #edf1ee;
+    margin-bottom: 16px;
+}
+
+.customer-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #183c2b;
+    margin: 0 0 4px;
+}
+
+.trx-number {
+    font-size: 13.5px;
+    color: #617568;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+}
+
+.info-item {
+    font-size: 14px;
+    display: flex;
+    gap: 8px;
+}
+
+.info-item.info-full {
+    grid-column: 1 / -1;
+}
+
+.info-label {
+    color: #66776c;
+    font-weight: 600;
+    min-width: 130px;
+}
+
+.info-value {
+    color: #1a3c2c;
+    font-weight: 500;
+}
+
+/* Summary Bar */
+.detail-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    background: #f7faf8;
+    border: 1px solid #e2ebe5;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 18px;
+}
+
+.sum-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sum-label {
+    font-size: 12px;
+    color: #617568;
+    font-weight: 600;
+}
+
+.sum-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #183c2b;
+}
+
+.sum-box.highlight .sum-value {
+    font-size: 20px;
+}
+
+.metode-tag {
+    background: #eaf1ed;
+    color: #23583a;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+/* Form Catat Bayar */
+.form-pembayaran-box {
+    margin-top: 24px;
+    background: #f8faf8;
+    border: 1px solid #dce8e1;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.form-pembayaran-box h4 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1c3c2d;
+}
+
+.form-grid-bayar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.form-grid-bayar .form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.batal-transaksi-section {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #edf1ee;
+}
+
+.batal-transaksi-section h4 {
+    margin: 0 0 6px;
+    color: #991b1b;
+}
+
+.batal-notice {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .detail-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detail-page-header .tombol-kembali {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .detail-header-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detail-header-row .tombol-ubah {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .detail-summary-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid-bayar {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-summary-bar {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .customer-name {
+        font-size: 19px;
+    }
+
+    .form-pembayaran-box {
+        padding: 14px;
+    }
+
+    .form-pembayaran-box .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .batal-transaksi-section .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+}

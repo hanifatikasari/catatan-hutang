@@ -1,12 +1,105 @@
+/* Utang Index Stylesheet */
 
-body{font-family:Arial,sans-serif;background:#f5f5f5;color:#333;margin:0;padding:20px}
-.wadah{max-width:1100px;margin:auto}.kepala,.pencarian{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.kotak{background:#fff;padding:20px;border-radius:8px;margin-top:20px}
-.tombol{display:inline-block;background:#287a4b;color:#fff;text-decoration:none;border:0;border-radius:5px;padding:10px 14px;cursor:pointer}
-input{padding:10px;border:1px solid #ccc;border-radius:5px;flex:1}
-table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #ddd;text-align:left}
-.pesan{background:#e4f5e9;padding:12px;border-radius:5px;margin-top:12px}.error{background:#fbe5e5}
-@media(max-width:700px){table,tbody,tr,td{display:block}thead{display:none}tr{border:1px solid #ddd;margin-bottom:12px;padding:8px}td{border:0}}
+.kepala {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
 
+.kepala h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #173b2b;
+    margin: 0 0 6px;
+}
 
-body{padding:0!important}
+.kepala .sub-text {
+    font-size: 13.5px;
+    color: #63776b;
+    margin: 0;
+}
+
+.pencarian {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.pencarian input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.pencarian-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.aksi {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.utang-foot-nav {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .kepala {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .kepala .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .kepala h1 {
+        font-size: 20px;
+    }
+
+    .pencarian {
+        flex-direction: column;
+    }
+
+    .pencarian input {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .pencarian-buttons {
+        width: 100%;
+    }
+
+    .pencarian-buttons .tombol {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .aksi {
+        justify-content: flex-start;
+    }
+
+    .utang-foot-nav {
+        flex-direction: column;
+    }
+
+    .utang-foot-nav .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+}

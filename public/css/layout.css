@@ -1,17 +1,416 @@
-*{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#f5f7f5;color:#26372d;margin:0}
-.app-sidebar{position:fixed;left:0;top:0;bottom:0;width:238px;background:#173b2b;color:#fff;padding:24px 16px;z-index:100;display:flex;flex-direction:column}
-.app-brand{display:block;font-size:20px;font-weight:700;letter-spacing:.2px;margin:2px 10px 8px;color:#fff;text-decoration:none}
-.app-subbrand{font-size:12px;color:#b8d1c3;margin:0 10px 25px}
-.app-nav{display:flex;flex-direction:column;gap:6px}
-.app-nav a{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:8px;color:#eaf4ee;text-decoration:none;font-size:14px;background:transparent}
-.app-nav a:hover,.app-nav a.active{background:#2d6147;color:#fff}
-.app-nav a .nav-icon{width:20px;text-align:center}
-.app-sidebar-foot{margin-top:auto;padding:12px 10px;color:#b8d1c3;font-size:12px}
-.app-topbar{position:fixed;left:238px;right:0;top:0;height:66px;background:#fff;border-bottom:1px solid #e7ece8;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
-.app-topbar-title{font-weight:700;color:#244534}
-.app-topbar-note{font-size:13px;color:#738178}
-.wadah{margin-left:260px!important;max-width:calc(100% - 280px)!important;padding-top:92px!important}
-input[type=number]{-moz-appearance:textfield;appearance:textfield}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-@media(max-width:760px){.app-sidebar{position:relative;width:100%;height:auto;bottom:auto;padding:13px 14px;display:block}.app-brand{font-size:18px;margin:0 4px}.app-subbrand{margin:3px 4px 12px}.app-nav{flex-direction:row;overflow-x:auto;gap:5px}.app-nav a{white-space:nowrap;padding:10px;font-size:13px}.app-sidebar-foot{display:none}.app-topbar{position:relative;left:auto;right:auto;top:auto;height:46px;padding:0 16px}.app-topbar-note{font-size:11px}.wadah{margin:0!important;max-width:none!important;width:auto!important;padding:16px!important}}
+/* ==========================================================================
+   Base Layout & Responsive Architecture - Catatan Hutang
+   Optimized for all viewports including Oppo A53 (360px x 800px) & Print
+   ========================================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #f4f7f5;
+    color: #24382c;
+    margin: 0;
+    padding: 0 !important;
+    min-height: 100vh;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* Number input arrow removal */
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar
+   -------------------------------------------------------------------------- */
+.app-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.app-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 250px;
+    background: #173b2b;
+    color: #fff;
+    padding: 20px 14px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 12px rgba(10, 30, 20, 0.08);
+}
+
+.app-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 6px 4px;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.app-brand-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.app-brand-text {
+    color: #ffffff;
+}
+
+.app-sidebar-close {
+    display: none;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    color: #eaf4ee;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-sidebar-close:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.app-subbrand {
+    font-size: 12px;
+    color: #9cbda9;
+    margin: 2px 8px 22px;
+    font-weight: 400;
+}
+
+.app-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.app-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    color: #d8e8de;
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 500;
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    min-height: 44px;
+}
+
+.app-nav a:hover {
+    background: #25543c;
+    color: #ffffff;
+}
+
+.app-nav a.active {
+    background: #2c684a;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.app-nav a .nav-icon {
+    width: 22px;
+    font-size: 16px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-sidebar-foot {
+    margin-top: auto;
+    padding: 14px 10px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-sidebar-foot-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #eaf4ee;
+    margin-bottom: 2px;
+}
+
+.app-sidebar-foot-desc {
+    color: #8fae9b;
+    font-size: 11.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Topbar
+   -------------------------------------------------------------------------- */
+.app-topbar {
+    position: fixed;
+    left: 250px;
+    right: 0;
+    top: 0;
+    height: 64px;
+    background: #ffffff;
+    border-bottom: 1px solid #e3eae5;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.app-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.app-sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid #dbe4df;
+    background: #f8faf8;
+    color: #173b2b;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.app-sidebar-toggle:hover {
+    background: #edf3ef;
+    border-color: #c4d4cc;
+}
+
+.app-sidebar-toggle:active {
+    transform: scale(0.96);
+}
+
+.app-topbar-title-group {
+    min-width: 0;
+}
+
+.app-topbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a3c2c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-topbar-note {
+    font-size: 12px;
+    color: #6c7e73;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.store-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #24583d;
+    background: #e9f4ed;
+    border: 1px solid #d1e7d9;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+/* --------------------------------------------------------------------------
+   Desktop Sidebar Collapsed State
+   -------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+    body.sidebar-collapsed .app-sidebar {
+        transform: translateX(-250px);
+    }
+    body.sidebar-collapsed .app-topbar {
+        left: 0;
+    }
+    body.sidebar-collapsed .wadah,
+    body.sidebar-collapsed .main,
+    body.sidebar-collapsed .backup-wrap {
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Main Content Wrappers (Shared Across All Pages)
+   -------------------------------------------------------------------------- */
+.wadah,
+.main,
+.backup-wrap {
+    margin-left: 250px !important;
+    max-width: calc(100% - 250px) !important;
+    width: auto !important;
+    padding: 84px 28px 40px !important;
+    min-height: 100vh;
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Responsive Adjustments (Oppo A53 ~360px viewport priority)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    body.sidebar-mobile-open {
+        overflow: hidden !important;
+    }
+
+    .app-sidebar-backdrop {
+        display: block;
+    }
+
+    body.sidebar-mobile-open .app-sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .app-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 82vw;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 999;
+        box-shadow: none;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.sidebar-mobile-open .app-sidebar {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .app-sidebar-close {
+        display: inline-flex;
+    }
+
+    .app-topbar {
+        left: 0 !important;
+        right: 0 !important;
+        height: 56px;
+        padding: 0 14px;
+    }
+
+    .app-topbar-title {
+        font-size: 15px;
+    }
+
+    .app-topbar-note {
+        font-size: 11px;
+    }
+
+    .wadah,
+    .main,
+    .backup-wrap {
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 70px 14px 28px !important;
+    }
+}
+
+/* Compact phones like Oppo A53 (viewport ~360px - 412px) */
+@media (max-width: 480px) {
+    .store-badge {
+        display: none;
+    }
+
+    .app-topbar-left {
+        gap: 10px;
+    }
+
+    .app-topbar-title {
+        font-size: 14px;
+        max-width: 220px;
+    }
+
+    .app-topbar-note {
+        display: none;
+    }
+
+    .wadah,
+    .main,
+    .backup-wrap {
+        padding: 66px 12px 24px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Print Stylesheet Reset (Hide navigation chrome)
+   -------------------------------------------------------------------------- */
+@media print {
+    .app-sidebar,
+    .app-sidebar-backdrop,
+    .app-topbar,
+    .app-sidebar-toggle {
+        display: none !important;
+    }
+
+    .wadah,
+    .main,
+    .backup-wrap {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}

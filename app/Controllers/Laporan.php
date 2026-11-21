@@ -39,7 +39,7 @@ class Laporan extends BaseController
             FROM pembayaran WHERE DATE(tanggal_bayar) BETWEEN ? AND ?", [$mulai, $sampai])->getRowArray();
 
         return view('laporan/index', [
-            'judul' => 'Laporan Hutang',
+            'judul' => 'Laporan Hutang Toko Ibu Zulaikhah',
             'mulai' => $mulai,
             'sampai' => $sampai,
             'utang' => $utang,

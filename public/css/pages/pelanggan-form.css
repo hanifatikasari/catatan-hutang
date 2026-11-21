@@ -1,14 +1,55 @@
+/* Pelanggan Form Stylesheet */
 
-        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; color: #333; }
-        .wadah { max-width: 650px; margin: auto; }
-        .kotak { background: white; padding: 25px; border-radius: 8px; margin-top: 20px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; margin-bottom: 18px; font-family: Arial, sans-serif; }
-        textarea { min-height: 90px; resize: vertical; }
-        .tombol { display: inline-block; padding: 11px 16px; background: #287a4b; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; }
-        .tombol-kembali { background: #777; }
-        .pesan-error { background: #fbe5e5; padding: 12px; border-radius: 5px; margin-bottom: 15px; }
-        .pesan-error ul { margin: 8px 0 0; }
-    
+.form-page-header {
+    margin-bottom: 20px;
+}
 
-body{padding:0!important}
+.form-page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #173b2b;
+    margin: 0 0 6px;
+}
+
+.form-page-header .sub-text {
+    font-size: 13.5px;
+    color: #63776b;
+    margin: 0;
+}
+
+.form-card {
+    max-width: 720px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #263e30;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .form-page-header h1 {
+        font-size: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .tombol {
+        width: 100%;
+        justify-content: center;
+    }
+}

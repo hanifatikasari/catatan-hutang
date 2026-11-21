@@ -1,6 +1,278 @@
-/* Global utilities shared by all pages */
-.pesan,.alert{padding:12px;border-radius:6px;margin:12px 0;background:#e4f5e9;color:#28583a}
-.pesan-error,.error{background:#fbe5e5;color:#8d2929}
-.tombol{display:inline-block;padding:10px 14px;background:#287a4b;color:#fff;text-decoration:none;border:0;border-radius:5px;cursor:pointer}
-.tombol:hover{filter:brightness(.96)}
-.tombol-ubah{background:#356ac3}.tombol-nonaktif{background:#b33a3a}.tombol-kembali,.secondary{background:#777}
+/* ==========================================================================
+   Global Utilities & Component Styles - Catatan Hutang
+   ========================================================================== */
+
+/* Flash Alerts & Messages */
+.pesan, .alert, .backup-success, .backup-error, .backup-warning {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 14px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pesan, .alert-success, .backup-success {
+    background: #e8f5ec;
+    color: #1e5a36;
+    border: 1px solid #cce8d4;
+}
+
+.pesan-error, .error, .alert-danger, .backup-error {
+    background: #fde8e8;
+    color: #991b1b;
+    border: 1px solid #f8b4b4;
+}
+
+.backup-warning, .alert-warning {
+    background: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+}
+
+/* Touch-Friendly Responsive Buttons */
+.tombol, .backup-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #236940;
+    color: #ffffff !important;
+    text-decoration: none;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    min-height: 40px;
+    touch-action: manipulation;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+
+.tombol:hover, .backup-button:hover {
+    background: #1b5333;
+    filter: brightness(1.05);
+}
+
+.tombol:active, .backup-button:active {
+    transform: scale(0.98);
+}
+
+.tombol-ubah {
+    background: #2563eb;
+}
+.tombol-ubah:hover {
+    background: #1d4ed8;
+}
+
+.tombol-nonaktif, .tombol-danger, .backup-button.danger {
+    background: #dc2626;
+}
+.tombol-nonaktif:hover, .tombol-danger:hover, .backup-button.danger:hover {
+    background: #b91c1c;
+}
+
+.tombol-kembali, .secondary, .backup-button.secondary {
+    background: #64748b;
+}
+.tombol-kembali:hover, .secondary:hover, .backup-button.secondary:hover {
+    background: #475569;
+}
+
+.tombol-cetak {
+    background: #0d7658;
+}
+.tombol-cetak:hover {
+    background: #095942;
+}
+
+.tombol-sm {
+    padding: 6px 12px;
+    min-height: 32px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.tombol-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    background: #eaf1ed;
+    color: #24583d !important;
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #d2e4d9;
+    transition: all 0.15s ease;
+}
+
+.tombol-pill:hover, .tombol-pill.active {
+    background: #24583d;
+    color: #ffffff !important;
+    border-color: #24583d;
+}
+
+/* Form Inputs & Controls */
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #2b4234;
+}
+
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="password"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid #cbd8d1;
+    border-radius: 7px;
+    box-sizing: border-box;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: #24382c;
+    background: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #236940;
+    box-shadow: 0 0 0 3px rgba(35, 105, 64, 0.14);
+}
+
+textarea {
+    min-height: 85px;
+    resize: vertical;
+}
+
+/* Standard Content Cards */
+.kotak {
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 12px;
+    border: 1px solid #e4eae6;
+    box-shadow: 0 2px 8px rgba(15, 35, 25, 0.03);
+    margin: 18px 0;
+}
+
+/* Responsive Table Scroll Containers */
+.table-scroll, .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: 1px solid #e5ebe7;
+    background: #ffffff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+th, td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf1ee;
+    vertical-align: middle;
+}
+
+th {
+    background: #f6f9f7;
+    color: #2b4737;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+tbody tr:hover {
+    background: #fbfdfc;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-lunas {
+    background: #def7ec;
+    color: #03543f;
+    border: 1px solid #bcf0da;
+}
+
+.badge-sebagian {
+    background: #fef08a;
+    color: #713f12;
+    border: 1px solid #fde047;
+}
+
+.badge-belum {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.badge-dibatalkan {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* Text helpers */
+.text-danger {
+    color: #b91c1c;
+}
+.text-success {
+    color: #15803d;
+}
+.text-muted {
+    color: #64748b;
+}
+
+/* Mobile responsive card adjustments */
+@media (max-width: 480px) {
+    .kotak {
+        padding: 16px 14px;
+        border-radius: 10px;
+    }
+
+    th, td {
+        padding: 10px 12px;
+        font-size: 13.5px;
+    }
+
+    .tombol, .backup-button {
+        padding: 9px 13px;
+        font-size: 13.5px;
+    }
+}
