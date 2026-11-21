@@ -5,7 +5,7 @@
 <title><?= esc($judul) ?> - Dashboard</title>
 <link rel="stylesheet" href="<?= base_url('css/layout.css') ?>">
 <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
-<link rel="stylesheet" href="<?= base_url('css/pages/dashboard.css ?>">
+<link rel="stylesheet" href="<?= base_url('css/pages/dashboard.css') ?>">
 </head>
 <body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'dashboard', 'judul' => $judul]) ?>
