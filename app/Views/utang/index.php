@@ -6,7 +6,7 @@
 <title><?= esc($judul) ?></title>
 <link rel="stylesheet" href="<?= base_url('css/layout.css') ?>">
 <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
-<link rel="stylesheet" href="<?= base_url('css/pages/utang-index.css ?>">
+<link rel="stylesheet" href="<?= base_url('css/pages/utang-index.css') ?>">
 </head>
 <body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'utang', 'judul' => $judul]) ?>
