@@ -11,6 +11,7 @@ $routes->group('pelanggan', static function ($routes) {
     $routes->post('simpan', 'Pelanggan::simpan');
 
     $routes->get('edit/(:num)', 'Pelanggan::edit/$1');
+    $routes->get('hutang/(:num)', 'Pelanggan::hutang/$1');
     $routes->post('perbarui/(:num)', 'Pelanggan::perbarui/$1');
 
     $routes->post('nonaktifkan/(:num)', 'Pelanggan::nonaktifkan/$1');
