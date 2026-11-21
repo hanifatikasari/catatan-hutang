@@ -19,29 +19,32 @@ class Pelanggan extends BaseController
         $status = $this->request->getGet('status') ?? 'aktif';
         $cari = trim($this->request->getGet('cari') ?? '');
         $aktif = ($status === 'tidak_aktif') ? 0 : 1;
+        $db = db_connect();
 
-        $builder = $this->pelangganModel
-            ->where('aktif', $aktif);
+        $builder = $db->table('pelanggan p')
+            ->select("p.*,
+                (SELECT COALESCE(SUM(GREATEST(0,
+                    (SELECT COALESCE(SUM(r.total_harga), 0) FROM rincian_utang r WHERE r.utang_id = u.id) -
+                    (SELECT COALESCE(SUM(b.jumlah_bayar), 0) FROM pembayaran b WHERE b.utang_id = u.id)
+                )), 0) FROM utang u WHERE u.pelanggan_id = p.id AND u.dibatalkan = 0) AS total_sisa_hutang")
+            ->where('p.aktif', $aktif);
 
         if ($cari !== '') {
             $builder->groupStart()
-                ->like('nama', $cari)
-                ->orLike('no_hp', $cari)
-                ->orLike('alamat', $cari)
-                ->orLike('catatan', $cari)
+                ->like('p.nama', $cari)
+                ->orLike('p.no_hp', $cari)
+                ->orLike('p.alamat', $cari)
+                ->orLike('p.catatan', $cari)
                 ->groupEnd();
         }
 
-        $data = [
-            'judul'       => 'Daftar Pelanggan',
-            'pelanggan' => $builder->orderBy('nama', 'ASC')->findAll(),
+        return view('pelanggan/index', [
+            'judul' => 'Daftar Pelanggan',
+            'pelanggan' => $builder->orderBy('p.nama', 'ASC')->get()->getResultArray(),
             'status' => $status,
             'cari' => $cari,
-        ];
-
-        return view('pelanggan/index', $data);
+        ]);
     }
-
 
     // Menampilkan formulir tambah pelanggan
     public function tambah()
