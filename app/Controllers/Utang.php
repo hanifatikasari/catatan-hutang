@@ -77,9 +77,18 @@ class Utang extends BaseController
         $jatuhTempo = trim($this->request->getPost('tanggal_jatuh_tempo') ?? '');
         $catatan = trim($this->request->getPost('catatan') ?? '');
 
-        if ($tanggal === '') {
+        $timestampUtang = $tanggal !== '' ? strtotime($tanggal) : false;
+        if ($timestampUtang === false) {
             return redirect()->back()->withInput()
-                ->with('error', 'Tanggal hutang wajib diisi.');
+                ->with('error', 'Tanggal hutang tidak valid.');
+        }
+
+        if ($jatuhTempo !== '') {
+            $dateTempo = \DateTime::createFromFormat('!Y-m-d', $jatuhTempo);
+            if (!$dateTempo || $dateTempo->format('Y-m-d') !== $jatuhTempo) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Tanggal jatuh tempo tidak valid.');
+            }
         }
 
         $barang = $this->request->getPost('nama_barang');
@@ -147,7 +156,7 @@ class Utang extends BaseController
         $utangId = $this->utangModel->insert([
             'pelanggan_id' => $pelangganId,
             'nomor_transaksi' => $nomor,
-            'tanggal_utang' => date('Y-m-d H:i:s', strtotime($tanggal)),
+            'tanggal_utang' => date('Y-m-d H:i:s', $timestampUtang),
             'tanggal_jatuh_tempo' => $jatuhTempo !== '' ? $jatuhTempo : null,
             'catatan' => $catatan !== '' ? $catatan : null,
             'dibatalkan' => 0,
@@ -223,7 +232,11 @@ class Utang extends BaseController
             return redirect()->back()->withInput()->with('error', 'Pilih cara pembayaran yang valid.');
         }
 
-        $tanggalBayar = $tanggalRaw !== '' ? date('Y-m-d H:i:s', strtotime($tanggalRaw)) : date('Y-m-d H:i:s');
+        $timestampBayar = $tanggalRaw !== '' ? strtotime($tanggalRaw) : time();
+        if ($timestampBayar === false) {
+            return redirect()->back()->withInput()->with('error', 'Tanggal pembayaran tidak valid.');
+        }
+        $tanggalBayar = date('Y-m-d H:i:s', $timestampBayar);
         $db = db_connect();
         $db->transBegin();
 
