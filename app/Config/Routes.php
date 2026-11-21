@@ -34,3 +34,5 @@ $routes->group('utang', static function ($routes) {
     $routes->post('bayar/(:num)', 'Utang::bayar/$1');
     $routes->post('batalkan/(:num)', 'Utang::batalkan/$1');
 });
+
+$routes->get('laporan', 'Laporan::index');
