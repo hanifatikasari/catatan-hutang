@@ -84,4 +84,4 @@ Pada branch feature/report-backup-restore tersedia menu cetak laporan serta back
 - Restore: unggah file SQL hasil backup aplikasi. Restore mengganti data tabel; aplikasi menyimpan backup pengaman sebelum pemulihan di writable/backups/before_restore_latest.sql.
 - Akses: password diperlukan untuk membuka menu selama 15 menit. Restore dibatasi ke perintah DROP/CREATE/INSERT untuk tabel yang sudah ada di database dan dilindungi CSRF.
 
-Sebelum mencoba restore, lakukan backup dan uji terlebih dahulu pada database salinan. Backup berisi data pelanggan dan transaksi, jadi simpan file secara privat. Fitur ini menggunakan MySQLi dan database utility CodeIgniter 4.
+Sebelum mencoba restore, lakukan backup dan uji terlebih dahulu pada database salinan. Backup berisi data pelanggan dan transaksi, jadi simpan file secara privat. Fitur backup menggunakan generator SQL berbasis MySQLi karena metode backup bawaan Database Utilities CI4 belum diimplementasikan untuk driver MySQLi. Dump mencakup struktur tabel dan data; view, trigger, procedure, dan event database tidak termasuk.
