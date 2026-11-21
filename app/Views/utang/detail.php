@@ -12,6 +12,7 @@
 <div class="kotak">
 <h2><?= esc($utang['nama_pelanggan']) ?></h2>
 <p>Nomor transaksi: <strong><?= esc($utang['nomor_transaksi']) ?></strong></p>
+<?php if ((int) $utang['dibatalkan'] !== 1): ?><p><a class="tombol tombol-ubah" href="<?= site_url('utang/edit/' . $utang['id']) ?>">Koreksi Catatan Hutang</a></p><?php endif ?>
 <p>Tanggal hutang: <?= esc(date('d-m-Y H:i', strtotime($utang['tanggal_utang']))) ?></p>
 <p>Jatuh tempo: <?= !empty($utang['tanggal_jatuh_tempo']) ? esc(date('d-m-Y', strtotime($utang['tanggal_jatuh_tempo']))) : '-' ?></p>
 <p>No. HP: <?= esc($utang['no_hp'] ?? '-') ?></p>
