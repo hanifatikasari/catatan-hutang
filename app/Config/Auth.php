@@ -7,10 +7,14 @@ use CodeIgniter\Config\BaseConfig;
 class Auth extends BaseConfig
 {
     /**
-     * Single private account for the shop.
-     * The password is stored as a one-way password_hash(), never as plaintext.
+     * Default username for the single private account.
+     * May be overridden in the server's ignored .env file.
      */
     public string $username = 'zulaikhah';
 
-    public string $passwordHash = '$2y$12$vfXlbFhaQRvtM3ozk60t/.ForahWOWW4OjGxdfRSfOQHFaB4MD9EO';
+    /**
+     * Keep the password hash in .env, not in the Git repository.
+     * Generate it with PHP password_hash(PASSWORD_DEFAULT).
+     */
+    public string $passwordHash = '';
 }
