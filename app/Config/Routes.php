@@ -37,7 +37,7 @@ $routes->group('utang', static function ($routes) {
     $routes->post('bayar/(:num)', 'Utang::bayar/$1');
     $routes->post('batalkan/(:num)', 'Utang::batalkan/$1');
     $routes->get('data-offline', 'Utang::dataOffline');
-    $routes->post('sinkronisasi-offline', 'Utang::sinkronisasiOffline');
+    $routes->post('sinkronisasi-offline', 'Utang::sinkronisasiOffline', ['filter' => 'csrf']);
 });
 
 $routes->get('laporan', 'Laporan::index');
