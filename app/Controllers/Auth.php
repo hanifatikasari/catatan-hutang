@@ -20,7 +20,6 @@ class Auth extends BaseController
 
         return view('auth/login', [
             'error' => session()->getFlashdata('error'),
-            'lockedUntil' => (int) session()->get(self::LOCKED_UNTIL_KEY),
         ]);
     }
 
@@ -35,11 +34,17 @@ class Auth extends BaseController
         }
 
         $config = config('Auth');
+        $expectedUsername = (string) env('CATATAN_LOGIN_USERNAME', $config->username);
+        $passwordHash = (string) env('CATATAN_LOGIN_PASSWORD_HASH', $config->passwordHash);
         $username = trim((string) $this->request->getPost('username'));
         $password = (string) $this->request->getPost('password');
 
-        $usernameValid = hash_equals($config->username, $username);
-        $passwordValid = password_verify($password, $config->passwordHash);
+        if ($passwordHash === '') {
+            return redirect()->to(site_url('login'))->with('error', 'Password login belum dikonfigurasi pada file .env server.');
+        }
+
+        $usernameValid = hash_equals($expectedUsername, $username);
+        $passwordValid = password_verify($password, $passwordHash);
 
         if (! $usernameValid || ! $passwordValid) {
             $attempts = (int) session()->get(self::ATTEMPTS_KEY) + 1;
