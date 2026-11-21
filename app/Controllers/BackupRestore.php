@@ -57,13 +57,7 @@ class BackupRestore extends BaseController
         }
 
         try {
-            $db = db_connect();
-            $sql = \Config\Database::utils()->backup([
-                'format' => 'txt',
-                'add_drop' => true,
-                'add_insert' => true,
-                'foreign_key_checks' => false,
-            ]);
+            $sql = $this->createSqlBackup();
 
             if (! is_string($sql) || $sql === '') {
                 throw new RuntimeException('Database tidak menghasilkan file backup.');
@@ -105,12 +99,7 @@ class BackupRestore extends BaseController
         try {
             $allowedTables = db_connect()->listTables();
             $statements = $this->validatedBackupStatements($sql, $allowedTables);
-            $currentBackup = \Config\Database::utils()->backup([
-                'format' => 'txt',
-                'add_drop' => true,
-                'add_insert' => true,
-                'foreign_key_checks' => false,
-            ]);
+            $currentBackup = $this->createSqlBackup();
 
             if (! is_string($currentBackup) || $currentBackup === '') {
                 throw new RuntimeException('Tidak dapat membuat backup pengaman sebelum restore.');
@@ -136,6 +125,75 @@ class BackupRestore extends BaseController
             log_message('error', 'Restore database gagal: {message}', ['message' => $e->getMessage()]);
             return redirect()->to('/backup-restore')->with('error', 'Restore gagal. Sistem mencoba mengembalikan backup pengaman; periksa log dan data sebelum melanjutkan.');
         }
+    }
+
+    /**
+     * Build a plain SQL dump using MySQL-compatible metadata queries.
+     * CI4's native Database Utils backup is not implemented for MySQLi.
+     */
+    private function createSqlBackup(): string
+    {
+        $db = db_connect();
+        $tables = $db->listTables();
+
+        if ($tables === []) {
+            throw new RuntimeException('Database tidak memiliki tabel untuk dibackup.');
+        }
+
+        $lines = [
+            '-- Catatan Hutang SQL backup',
+            '-- Created: ' . date('Y-m-d H:i:s'),
+            'SET FOREIGN_KEY_CHECKS = 0;',
+            '',
+        ];
+
+        foreach ($tables as $table) {
+            $quotedTable = $db->escapeIdentifiers($table);
+            $createQuery = $db->query('SHOW CREATE TABLE ' . $quotedTable);
+            $createRow = $createQuery->getRowArray();
+
+            if (! is_array($createRow) || count($createRow) < 2) {
+                throw new RuntimeException('Tidak dapat membaca struktur tabel: ' . $table);
+            }
+
+            $createSql = (string) array_values($createRow)[1];
+            if ($createSql === '') {
+                throw new RuntimeException('Struktur tabel kosong: ' . $table);
+            }
+
+            $lines[] = 'DROP TABLE IF EXISTS ' . $quotedTable . ';';
+            $lines[] = $createSql . ';';
+            $lines[] = '';
+
+            $dataQuery = $db->query('SELECT * FROM ' . $quotedTable);
+            $columns = $dataQuery->getFieldNames();
+            $rows = $dataQuery->getResultArray();
+
+            if ($columns === []) {
+                continue;
+            }
+
+            $quotedColumns = array_map(
+                static fn (string $column): string => $db->escapeIdentifiers($column),
+                $columns
+            );
+            $columnSql = implode(', ', $quotedColumns);
+
+            foreach ($rows as $row) {
+                $values = [];
+                foreach ($columns as $column) {
+                    $values[] = $db->escape($row[$column] ?? null);
+                }
+
+                $lines[] = 'INSERT INTO ' . $quotedTable
+                    . ' (' . $columnSql . ') VALUES (' . implode(', ', $values) . ');';
+            }
+
+            $lines[] = '';
+        }
+
+        $lines[] = 'SET FOREIGN_KEY_CHECKS = 1;';
+        return implode("\n", $lines) . "\n";
     }
 
     private function configuredPassword(): string
