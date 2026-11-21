@@ -34,7 +34,7 @@
 <td>Rp<?= number_format((int)$u['total_hutang'], 0, ',', '.') ?></td>
 <td>Rp<?= number_format((int)$u['total_bayar'], 0, ',', '.') ?></td>
 <td><strong>Rp<?= number_format($sisa, 0, ',', '.') ?></strong></td>
-<td><a class="tombol" href="<?= site_url('utang/detail/' . $u['id']) ?>">Detail</a></td>
+<td><a class="tombol" href="<?= site_url('utang/detail/' . $u['id']) ?>">Detail</a> <a class="tombol tombol-ubah" href="<?= site_url('utang/edit/' . $u['id']) ?>">Koreksi</a></td>
 </tr>
 <?php endforeach; endif ?>
 </tbody></table>
