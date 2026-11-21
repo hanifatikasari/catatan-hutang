@@ -263,4 +263,42 @@ class Utang extends BaseController
         return redirect()->to('/utang/detail/' . $id)->with('success', 'Pembayaran berhasil dicatat.');
     }
 
+
+    public function batalkan($id)
+    {
+        $alasan = trim((string) $this->request->getPost('alasan_batal'));
+        if ($alasan === '' || mb_strlen($alasan) > 255) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Alasan pembatalan wajib diisi, maksimal 255 karakter.');
+        }
+
+        $db = db_connect();
+        $db->transBegin();
+        $utang = $db->query('SELECT * FROM utang WHERE id = ? FOR UPDATE', [$id])->getRowArray();
+
+        if (!$utang || (int) $utang['dibatalkan'] === 1) {
+            $db->transRollback();
+            return redirect()->to('/utang')->with('error', 'Transaksi tidak ditemukan atau sudah dibatalkan.');
+        }
+
+        $pembayaran = $db->table('pembayaran')->where('utang_id', $id)->countAllResults();
+        if ($pembayaran > 0) {
+            $db->transRollback();
+            return redirect()->back()->with('error', 'Transaksi yang sudah memiliki pembayaran tidak dapat dibatalkan. Hubungi pengelola untuk koreksi.');
+        }
+
+        $ok = $this->utangModel->update($id, [
+            'dibatalkan' => 1,
+            'alasan_batal' => $alasan,
+        ]);
+
+        if (!$ok || $db->transStatus() === false) {
+            $db->transRollback();
+            return redirect()->back()->with('error', 'Pembatalan gagal disimpan.');
+        }
+
+        $db->transCommit();
+        return redirect()->to('/utang')->with('success', 'Transaksi hutang berhasil dibatalkan.');
+    }
+
 }
