@@ -6,7 +6,19 @@ const SyncManager = (function () {
     let deferredInstallPrompt = null;
     let isSyncing = false;
 
-    // Toast Notification System
+    function getCsrfToken() {
+        const cookieName = 'csrf_cookie_name';
+        const cookie = document.cookie.split('; ').find(row => row.startsWith(cookieName + '='));
+        return cookie ? decodeURIComponent(cookie.substring(cookieName.length + 1)) : '';
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        })[character]);
+    }
+
+    // Toast Notification System. Use textContent so names/notes cannot inject markup.
     function showToast(message, type = 'info', duration = 4000) {
         let container = document.getElementById('appToastContainer');
         if (!container) {
@@ -18,18 +30,16 @@ const SyncManager = (function () {
 
         const toast = document.createElement('div');
         toast.className = `app-toast toast-${type}`;
-        
-        let icon = 'ℹ️';
-        if (type === 'success') icon = '✅';
-        if (type === 'warning') icon = '⚠️';
-        if (type === 'error') icon = '❌';
-
-        toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-msg">${message}</span>`;
+        const icon = document.createElement('span');
+        icon.className = 'toast-icon';
+        icon.textContent = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : type === 'error' ? '❌' : 'ℹ️';
+        const messageNode = document.createElement('span');
+        messageNode.className = 'toast-msg';
+        messageNode.textContent = message;
+        toast.append(icon, messageNode);
         container.appendChild(toast);
 
-        // Animate in
         requestAnimationFrame(() => toast.classList.add('show'));
-
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
@@ -157,7 +167,8 @@ const SyncManager = (function () {
         }
     }
 
-    // Synchronize Pending Offline Transactions to Server
+    // Synchronize queue in bounded batches. Each item remains queued until the server
+    // acknowledges its stable local_id (including safe acknowledgements of retries).
     async function syncPendingTransactions(manual = false) {
         if (isSyncing || !navigator.onLine || !window.AppDB) {
             if (manual && !navigator.onLine) {
@@ -166,61 +177,76 @@ const SyncManager = (function () {
             return;
         }
 
+        isSyncing = true;
+        let syncedCount = 0;
+        let failedCount = 0;
         try {
             const queue = await window.AppDB.getAntreanUtang();
             if (!queue || queue.length === 0) {
-                if (manual) {
-                    showToast('Semua transaksi sudah tersinkronkan dengan server.', 'info');
-                }
-                updateStatusUI();
+                if (manual) showToast('Semua transaksi sudah tersinkronkan dengan server.', 'info');
+                await updateStatusUI();
                 return;
             }
 
-            isSyncing = true;
-            showToast(`Mengirim ${queue.length} transaksi offline ke server...`, 'info', 2500);
-
-            const response = await fetch('/utang/sinkronisasi-offline', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ items: queue })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Server returned status ${response.status}`);
+            const csrfToken = getCsrfToken();
+            if (!csrfToken) {
+                throw new Error('Token keamanan tidak tersedia. Muat ulang halaman saat online, lalu coba sinkronkan lagi.');
             }
 
-            const result = await response.json();
+            for (let offset = 0; offset < queue.length; offset += 50) {
+                if (!navigator.onLine) break;
+                const batch = queue.slice(offset, offset + 50);
+                showToast(`Mengirim ${Math.min(offset + batch.length, queue.length)} dari ${queue.length} transaksi offline...`, 'info', 2200);
 
-            if (result.success && Array.isArray(result.synced)) {
-                // Remove synced items from queue
-                for (const item of result.synced) {
-                    await window.AppDB.removeAntreanUtang(item.local_id);
+                const response = await fetch('/utang/sinkronisasi-offline', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({ items: batch })
+                });
+
+                if (!response.ok) {
+                    const body = await response.json().catch(() => ({}));
+                    throw new Error(body.message || `Server merespons ${response.status}`);
                 }
 
-                showToast(`✅ Berhasil menyinkronkan ${result.synced_count} transaksi ke server!`, 'success', 4500);
+                const result = await response.json();
+                const acknowledged = Array.isArray(result.synced) ? result.synced : [];
+                for (const item of acknowledged) {
+                    await window.AppDB.removeAntreanUtang(item.local_id);
+                }
+                syncedCount += acknowledged.length;
+                failedCount += Array.isArray(result.errors) ? result.errors.length : 0;
 
-                // Refresh cache from server
+                // CI4 regenerates CSRF cookies after successful protected requests.
+                // Read the latest cookie before the next batch.
+            }
+
+            if (syncedCount > 0) {
                 await refreshOfflineCache();
-                await updateStatusUI();
-
-                // If currently on utang page, refresh page to show real server IDs
+                if (failedCount > 0) {
+                    showToast(`${syncedCount} transaksi tersinkron. ${failedCount} transaksi perlu diperiksa dan masih tersimpan di antrean.`, 'warning', 6000);
+                } else {
+                    showToast(`Berhasil menyinkronkan ${syncedCount} transaksi ke server!`, 'success', 4500);
+                }
                 if (window.location.pathname.includes('/utang')) {
                     setTimeout(() => window.location.reload(), 1200);
                 }
-            } else {
-                showToast('Sebagian transaksi offline gagal disinkronkan. Akan dicoba kembali nanti.', 'warning');
+            } else if (failedCount > 0) {
+                showToast('Transaksi belum berhasil disinkronkan. Data tetap tersimpan di perangkat.', 'warning', 6000);
+            } else if (manual) {
+                showToast('Tidak ada transaksi yang perlu dikirim.', 'info');
             }
         } catch (err) {
             console.error('[Sync] Synchronization failed:', err);
-            if (manual) {
-                showToast('Gagal menyinkronkan transaksi. Periksa koneksi internet Anda.', 'error');
-            }
+            showToast(err.message || 'Gagal menyinkronkan transaksi. Periksa koneksi internet Anda.', 'error', 6000);
         } finally {
             isSyncing = false;
-            updateStatusUI();
+            await updateStatusUI();
         }
     }
 
@@ -388,8 +414,8 @@ const SyncManager = (function () {
 
                         tr.innerHTML = `
                             <td>${dateStr}</td>
-                            <td><strong style="color: #b45309;">${item.local_id}</strong></td>
-                            <td>${item.nama_pelanggan}</td>
+                            <td><strong style="color: #b45309;">${escapeHtml(item.local_id)}</strong></td>
+                            <td>${escapeHtml(item.nama_pelanggan)}</td>
                             <td style="text-align: right;">Rp${totalStr}</td>
                             <td style="text-align: right;">Rp0</td>
                             <td style="text-align: right;"><strong class="text-danger">Rp${totalStr}</strong></td>
@@ -432,8 +458,8 @@ const SyncManager = (function () {
 
                         tr.innerHTML = `
                             <td>${dateStr}</td>
-                            <td><strong>${u.nomor_transaksi}</strong></td>
-                            <td>${u.nama_pelanggan}</td>
+                            <td><strong>${escapeHtml(u.nomor_transaksi)}</strong></td>
+                            <td>${escapeHtml(u.nama_pelanggan)}</td>
                             <td style="text-align: right;">Rp${totalStr}</td>
                             <td style="text-align: right;">Rp${bayarStr}</td>
                             <td style="text-align: right;"><strong class="${isLunas ? 'text-success' : 'text-danger'}">Rp${sisaStr}</strong></td>
@@ -471,9 +497,9 @@ const SyncManager = (function () {
                         const sisaStr = Number(p.total_sisa_hutang || 0).toLocaleString('id-ID');
 
                         tr.innerHTML = `
-                            <td><strong>${p.nama}</strong></td>
-                            <td>${p.no_hp || '-'}</td>
-                            <td>${p.alamat || '-'}<br><small style="color:#63776b;">${p.catatan || ''}</small></td>
+                            <td><strong>${escapeHtml(p.nama)}</strong></td>
+                            <td>${escapeHtml(p.no_hp || '-')}</td>
+                            <td>${escapeHtml(p.alamat || '-')}<br><small style="color:#63776b;">${escapeHtml(p.catatan || '')}</small></td>
                             <td style="text-align: right;"><strong class="text-danger">Rp${sisaStr}</strong></td>
                             <td style="text-align: right;">
                                 <span style="font-size:12px; color:#6d7d72;">Tersimpan Offline</span>
