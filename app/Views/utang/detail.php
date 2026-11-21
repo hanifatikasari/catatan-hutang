@@ -6,7 +6,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px s
 .tombol{display:inline-block;background:#287a4b;color:white;text-decoration:none;padding:10px 14px;border-radius:5px}
 </style></head><body><div class="wadah">
 <h1>Detail Hutang</h1>
-<?php if ($pesan = session()->getFlashdata('success')): ?><p><?= esc($pesan) ?></p><?php endif ?>
+<?php if ($pesan = session()->getFlashdata('success')): ?><p style="background:#e4f5e9;padding:12px;border-radius:5px"><?= esc($pesan) ?></p><?php endif ?>
+<?php if ($pesan = session()->getFlashdata('error')): ?><p style="background:#fbe5e5;padding:12px;border-radius:5px"><?= esc($pesan) ?></p><?php endif ?>
 <div class="kotak">
 <h2><?= esc($utang['nama_pelanggan']) ?></h2>
 <p>Nomor transaksi: <strong><?= esc($utang['nomor_transaksi']) ?></strong></p>
