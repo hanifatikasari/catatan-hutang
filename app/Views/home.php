@@ -60,6 +60,7 @@
             Daftar Pelanggan
         </a>
         <p><a href="<?= site_url('utang') ?>">Catatan Hutang</a></p>
+        <p><a href="<?= site_url('laporan') ?>">Laporan</a></p>
     </div>
 </div>
 
