@@ -18,7 +18,7 @@ class AddOfflineSyncIdToUtang extends Migration
             ],
         ]);
 
-        $this->forge->addKey('offline_id', true, true);
+        $this->forge->addKey('offline_id', false, true);
         $this->forge->processIndexes('utang');
     }
 
