@@ -10,13 +10,13 @@ class Utang extends BaseController
 {
     protected $pelangganModel;
     protected $utangModel;
-    protected $rincianModel;
+    protected $rincianModel;\n    protected $pembayaranModel;
 
     public function __construct()
     {
         $this->pelangganModel = new PelangganModel();
         $this->utangModel = new UtangModel();
-        $this->rincianModel = new RincianUtangModel();
+        $this->rincianModel = new RincianUtangModel();\n        $this->pembayaranModel = new PembayaranModel();
     }
 
     public function index()
