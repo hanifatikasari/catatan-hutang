@@ -110,3 +110,25 @@ CREATE UNIQUE INDEX `utang_offline_id_unique`
 ```
 
 Catatan: data pelanggan dan maksimal 150 transaksi terbaru disimpan pada perangkat yang pernah memuat data saat online. Data offline tidak langsung tersedia di perangkat lain sampai berhasil disinkronkan. Browser perlu mendukung Service Worker dan IndexedDB, serta website harus diakses melalui HTTPS (localhost untuk pengembangan). Backup perangkat dan server tetap perlu dilakukan; cache offline bukan pengganti backup.
+
+
+## Login privat (satu akun)
+
+Aplikasi Catatan Hutang dilindungi login native CodeIgniter 4. Semua route aplikasi dan endpoint data/sinkronisasi memerlukan session login. Registrasi publik tidak tersedia.
+
+Sebelum menjalankan aplikasi, atur kredensial di file `.env` (jangan commit file ini):
+
+```ini
+CATATAN_LOGIN_USERNAME = zulaikhah
+CATATAN_LOGIN_PASSWORD_HASH = 'PASTE_HASH_PASSWORD_DI_SINI'
+```
+
+Buat hash password sendiri lalu ganti placeholder di atas. Source code hanya membaca hash, bukan password teks biasa. Untuk mengganti password, buat hash baru di komputer/server dengan PHP:
+
+```bash
+php -r 'echo password_hash(readline("Password baru: "), PASSWORD_DEFAULT), PHP_EOL;'
+```
+
+Salin hasil hash ke `CATATAN_LOGIN_PASSWORD_HASH` di file `.env` lokal dan hosting. Jangan memasukkan hash atau password ke file yang di-commit. Gunakan password unik yang panjang; aktifkan HTTPS saat hosting.
+
+Login menerapkan CSRF dan mengunci percobaan berulang dalam session. Halaman privat mengirim header `no-store`, dan service worker tidak menyimpan HTML halaman login/data. Karena halaman privat tidak di-cache, halaman catat transaksi tidak dapat dibuka saat offline; antrean offline yang sudah tersimpan di IndexedDB tetap berada di perangkat sampai disinkronkan.
