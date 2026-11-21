@@ -1,68 +1,63 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title><?= esc($judul) ?></title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 30px;
-            color: #333;
-        }
-
-        .wadah {
-            max-width: 900px;
-            margin: auto;
-        }
-
-        .kotak {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        a {
-            display: inline-block;
-            padding: 12px 16px;
-            background: #287a4b;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-            .ringkasan { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:20px; }
-        .angka { font-size:24px; font-weight:bold; margin:8px 0; }
-        .menu { display:flex; gap:10px; flex-wrap:wrap; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?= esc($judul) ?> - Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#f4f7f5;margin:0;color:#26372d}
+.app-sidebar{position:fixed;left:0;top:0;bottom:0;width:238px;background:#173b2b;color:#fff;padding:24px 16px;z-index:100;display:flex;flex-direction:column}
+.app-brand{font-size:20px;font-weight:700;margin:2px 10px 8px}.app-subbrand{font-size:12px;color:#b8d1c3;margin:0 10px 25px}
+.app-nav{display:flex;flex-direction:column;gap:6px}.app-nav a{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:8px;color:#eaf4ee;text-decoration:none;font-size:14px}
+.app-nav a:hover,.app-nav a.active{background:#2d6147;color:#fff}.nav-icon{width:20px;text-align:center}
+.app-sidebar-foot{margin-top:auto;padding:12px 10px;color:#b8d1c3;font-size:12px}
+.app-topbar{position:fixed;left:238px;right:0;top:0;height:66px;background:#fff;border-bottom:1px solid #e7ece8;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:0 30px}
+.app-topbar-title{font-weight:700;color:#244534}.app-topbar-note{font-size:13px;color:#738178}
+.main{margin-left:238px;padding:96px 30px 35px;max-width:1500px}
+.eyebrow{color:#60806b;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+h1{font-size:28px;margin:8px 0}.intro{color:#758178;margin:0 0 25px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{background:#fff;border:1px solid #e8eeea;border-radius:14px;padding:20px;box-shadow:0 3px 12px rgba(26,59,42,.03)}
+.card-label{font-size:13px;color:#6d7d72}.card-value{font-size:26px;font-weight:700;color:#244534;margin:14px 0 8px;overflow-wrap:anywhere}.card-foot{font-size:12px;color:#8a968d}
+.section-title{font-size:18px;margin:28px 0 14px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.action{background:#fff;border:1px solid #e8eeea;border-radius:14px;padding:20px;text-decoration:none;color:#26372d;display:block}
+.action:hover{border-color:#91b7a0;transform:translateY(-1px)}.action-icon{font-size:24px;margin-bottom:12px}.action h3{margin:0 0 8px;font-size:16px}.action p{margin:0;color:#758178;font-size:13px;line-height:1.5}
+.note{margin-top:20px;background:#eaf3ed;border:1px solid #d9e8dd;padding:16px;border-radius:12px;color:#42634d;font-size:13px;line-height:1.6}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.actions{grid-template-columns:1fr}}
+@media(max-width:760px){.app-sidebar{position:relative;width:100%;height:auto;bottom:auto;padding:13px 14px;display:block}.app-brand{font-size:18px;margin:0 4px}.app-subbrand{margin:3px 4px 12px}.app-nav{flex-direction:row;overflow-x:auto;gap:5px}.app-nav a{white-space:nowrap;padding:10px;font-size:13px}.app-sidebar-foot{display:none}.app-topbar{position:relative;left:auto;right:auto;top:auto;height:46px;padding:0 16px}.app-topbar-note{font-size:11px}.main{margin:0;padding:22px 16px}.cards{gap:10px}.card{padding:15px}.card-value{font-size:21px}h1{font-size:24px}}
+@media(max-width:420px){.cards{grid-template-columns:1fr 1fr}.card-value{font-size:19px}}
+</style>
 </head>
 <body>
-
-<div class="wadah">
-    <h1><?= esc($judul) ?></h1>
-    <p>Ringkasan kondisi hutang dan piutang warung.</p>
-    <div class="ringkasan">
-        <div class="kotak"><div>Pelanggan Aktif</div><div class="angka"><?= number_format((int) $pelangganAktif, 0, ',', '.') ?></div></div>
-        <div class="kotak"><div>Total Piutang Belum Lunas</div><div class="angka">Rp<?= number_format((int) $totalPiutang, 0, ',', '.') ?></div></div>
-        <div class="kotak"><div>Transaksi Belum Lunas</div><div class="angka"><?= number_format((int) $transaksiBelumLunas, 0, ',', '.') ?></div></div>
-        <div class="kotak"><div>Lewat Jatuh Tempo</div><div class="angka"><?= number_format((int) $jatuhTempo, 0, ',', '.') ?></div></div>
-    </div>
-
-    <div class="kotak">
-        <h2>Menu Utama</h2>
-        <p>Kelola pelanggan dan catat transaksi hutang.</p>
-        <a href="<?= site_url('pelanggan') ?>">
-            Daftar Pelanggan
-        </a>
-        <p><a href="<?= site_url('utang') ?>">Catatan Hutang</a></p>
-        <p><a href="<?= site_url('laporan') ?>">Laporan</a></p>
-    </div>
-</div>
-
-</body>
-</html>
+<aside class="app-sidebar">
+<div class="app-brand">Catatan Hutang</div><div class="app-subbrand">Pembukuan warung sederhana</div>
+<nav class="app-nav">
+<a class="active" href="<?= site_url('/') ?>"><span class="nav-icon">⌂</span>Dashboard</a>
+<a href="<?= site_url('pelanggan') ?>"><span class="nav-icon">♙</span>Pelanggan</a>
+<a href="<?= site_url('utang') ?>"><span class="nav-icon">▤</span>Catatan Hutang</a>
+<a href="<?= site_url('laporan') ?>"><span class="nav-icon">▥</span>Laporan</a>
+</nav><div class="app-sidebar-foot">Pencatatan • Pembayaran • Piutang</div>
+</aside>
+<header class="app-topbar"><div class="app-topbar-title">Dashboard</div><div class="app-topbar-note">Ringkasan pembukuan warung</div></header>
+<main class="main">
+<div class="eyebrow">Ikhtisar usaha</div>
+<h1>Selamat datang di Catatan Hutang</h1>
+<p class="intro">Pantau piutang dan kelola catatan pelanggan dalam satu tempat.</p>
+<section class="cards">
+<div class="card"><div class="card-label">Pelanggan Aktif</div><div class="card-value"><?= number_format((int) $pelangganAktif, 0, ',', '.') ?></div><div class="card-foot">Pelanggan yang masih aktif</div></div>
+<div class="card"><div class="card-label">Total Piutang</div><div class="card-value">Rp<?= number_format((int) $totalPiutang, 0, ',', '.') ?></div><div class="card-foot">Sisa hutang yang belum lunas</div></div>
+<div class="card"><div class="card-label">Transaksi Belum Lunas</div><div class="card-value"><?= number_format((int) $transaksiBelumLunas, 0, ',', '.') ?></div><div class="card-foot">Termasuk pembayaran sebagian</div></div>
+<div class="card"><div class="card-label">Lewat Jatuh Tempo</div><div class="card-value"><?= number_format((int) $jatuhTempo, 0, ',', '.') ?></div><div class="card-foot">Transaksi belum lunas yang terlambat</div></div>
+</section>
+<h2 class="section-title">Akses cepat</h2>
+<section class="actions">
+<a class="action" href="<?= site_url('utang/tambah') ?>"><div class="action-icon">＋</div><h3>Catat Hutang Baru</h3><p>Masukkan transaksi dan barang yang dihutang pelanggan.</p></a>
+<a class="action" href="<?= site_url('pelanggan/tambah') ?>"><div class="action-icon">♙</div><h3>Tambah Pelanggan</h3><p>Simpan data pelanggan baru atau periksa data yang sudah ada.</p></a>
+<a class="action" href="<?= site_url('utang') ?>"><div class="action-icon">▤</div><h3>Kelola Hutang</h3><p>Lihat transaksi, buka detail, dan catat pembayaran.</p></a>
+<a class="action" href="<?= site_url('pelanggan') ?>"><div class="action-icon">☷</div><h3>Daftar Pelanggan</h3><p>Cari pelanggan aktif maupun pelanggan tidak aktif.</p></a>
+<a class="action" href="<?= site_url('laporan') ?>"><div class="action-icon">▥</div><h3>Laporan</h3><p>Periksa ringkasan transaksi dan pembayaran berdasarkan tanggal.</p></a>
+</section>
+<div class="note">Tips: catat pembayaran melalui halaman detail transaksi agar jumlah yang dibayar dan sisa hutang selalu tercatat dalam riwayat.</div>
+</main>
+</body></html>
