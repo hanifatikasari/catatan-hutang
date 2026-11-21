@@ -56,7 +56,7 @@ class Auth extends BaseController
         session()->remove([self::ATTEMPTS_KEY, self::LOCKED_UNTIL_KEY]);
         session()->regenerate(true);
         session()->set(self::SESSION_KEY, [
-            'username' => $config->username,
+            'username' => $expectedUsername,
             'logged_in_at' => $now,
         ]);
 
