@@ -39,3 +39,9 @@ $routes->group('utang', static function ($routes) {
 });
 
 $routes->get('laporan', 'Laporan::index');
+
+$routes->get('backup-restore', 'BackupRestore::index');
+$routes->post('backup-restore/unlock', 'BackupRestore::unlock', ['filter' => 'csrf']);
+$routes->post('backup-restore/lock', 'BackupRestore::lock', ['filter' => 'csrf']);
+$routes->get('backup-restore/download', 'BackupRestore::download');
+$routes->post('backup-restore/restore', 'BackupRestore::restore', ['filter' => 'csrf']);
