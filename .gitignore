@@ -51,6 +51,9 @@ Vagrantfile
 /writable/cache/*
 !/writable/cache/index.html
 
+/writable/backups/*.sql
+!/writable/backups/index.html
+
 /writable/logs/*
 !/writable/logs/index.html
 
