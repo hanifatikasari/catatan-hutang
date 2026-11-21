@@ -46,10 +46,11 @@
 
     <div class="kotak">
         <h2>Menu Utama</h2>
-        <p>Mulai dengan mengelola data pelanggan.</p>
+        <p>Kelola pelanggan dan catat transaksi hutang.</p>
         <a href="<?= site_url('pelanggan') ?>">
             Daftar Pelanggan
         </a>
+        <p><a href="<?= site_url('utang') ?>">Catatan Hutang</a></p>
     </div>
 </div>
 
