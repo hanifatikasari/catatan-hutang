@@ -25,3 +25,14 @@ $routes->group('pelanggan', static function ($routes) {
         'Pelanggan::simpanTetap'
     );
 });
+
+$routes->group('utang', static function ($routes) {
+    $routes->get('/', 'Utang::index');
+    $routes->get('tambah', 'Utang::tambah');
+    $routes->post('simpan', 'Utang::simpan');
+    $routes->get('detail/(:num)', 'Utang::detail/$1');
+    $routes->post('bayar/(:num)', 'Utang::bayar/$1');
+    $routes->post('batalkan/(:num)', 'Utang::batalkan/$1');
+});
+
+$routes->get('laporan', 'Laporan::index');
