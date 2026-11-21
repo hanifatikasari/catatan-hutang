@@ -5,18 +5,21 @@ namespace App\Controllers;
 use App\Models\PelangganModel;
 use App\Models\UtangModel;
 use App\Models\RincianUtangModel;
+use App\Models\PembayaranModel;
 
 class Utang extends BaseController
 {
     protected $pelangganModel;
     protected $utangModel;
-    protected $rincianModel;\n    protected $pembayaranModel;
+    protected $rincianModel;
+    protected $pembayaranModel;
 
     public function __construct()
     {
         $this->pelangganModel = new PelangganModel();
         $this->utangModel = new UtangModel();
-        $this->rincianModel = new RincianUtangModel();\n        $this->pembayaranModel = new PembayaranModel();
+        $this->rincianModel = new RincianUtangModel();
+        $this->pembayaranModel = new PembayaranModel();
     }
 
     public function index()
@@ -205,4 +208,59 @@ class Utang extends BaseController
                 ->get()->getResultArray(),
         ]);
     }
+
+    public function bayar($id)
+    {
+        $jumlahRaw = trim((string) $this->request->getPost('jumlah_bayar'));
+        $caraBayar = trim((string) $this->request->getPost('cara_bayar'));
+        $catatan = trim((string) ($this->request->getPost('catatan') ?? ''));
+        $tanggalRaw = trim((string) ($this->request->getPost('tanggal_bayar') ?? ''));
+
+        if (!ctype_digit($jumlahRaw) || (int) $jumlahRaw <= 0) {
+            return redirect()->back()->withInput()->with('error', 'Jumlah pembayaran harus lebih dari Rp0.');
+        }
+        if (!in_array($caraBayar, ['Tunai', 'Transfer', 'QRIS', 'Lainnya'], true)) {
+            return redirect()->back()->withInput()->with('error', 'Pilih cara pembayaran yang valid.');
+        }
+
+        $tanggalBayar = $tanggalRaw !== '' ? date('Y-m-d H:i:s', strtotime($tanggalRaw)) : date('Y-m-d H:i:s');
+        $db = db_connect();
+        $db->transBegin();
+
+        $utang = $db->query('SELECT * FROM utang WHERE id = ? FOR UPDATE', [$id])->getRowArray();
+        if (!$utang || (int) $utang['dibatalkan'] === 1) {
+            $db->transRollback();
+            return redirect()->to('/utang')->with('error', 'Transaksi tidak ditemukan atau sudah dibatalkan.');
+        }
+
+        $totalHutangRow = $db->table('rincian_utang')->selectSum('total_harga')->where('utang_id', $id)->get()->getRowArray();
+        $totalBayarRow = $db->table('pembayaran')->selectSum('jumlah_bayar')->where('utang_id', $id)->get()->getRowArray();
+        $totalHutang = (int) ($totalHutangRow['total_harga'] ?? 0);
+        $totalBayar = (int) ($totalBayarRow['jumlah_bayar'] ?? 0);
+        $sisa = max(0, $totalHutang - $totalBayar);
+        $jumlahBayar = (int) $jumlahRaw;
+
+        if ($jumlahBayar > $sisa) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Pembayaran melebihi sisa hutang. Sisa saat ini Rp' . number_format($sisa, 0, ',', '.') . '.');
+        }
+
+        $berhasil = $this->pembayaranModel->insert([
+            'utang_id' => $id,
+            'tanggal_bayar' => $tanggalBayar,
+            'jumlah_bayar' => $jumlahBayar,
+            'cara_bayar' => $caraBayar,
+            'catatan' => $catatan !== '' ? $catatan : null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (!$berhasil || $db->transStatus() === false) {
+            $db->transRollback();
+            return redirect()->back()->withInput()->with('error', 'Pembayaran gagal disimpan.');
+        }
+
+        $db->transCommit();
+        return redirect()->to('/utang/detail/' . $id)->with('success', 'Pembayaran berhasil dicatat.');
+    }
+
 }
