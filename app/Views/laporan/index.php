@@ -3,11 +3,13 @@
 <title><?= esc($judul) ?></title>
 <link rel="stylesheet" href="<?= base_url('css/layout.css') ?>">
 <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
-<link rel="stylesheet" href="<?= base_url('css/pages/laporan-index.css\n<link rel="stylesheet" href="<?= base_url('css/pages/laporan-print.css') ?>">') ?>"></head><body>
+<link rel="stylesheet" href="<?= base_url('css/pages/laporan-index.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/pages/laporan-print.css') ?>"></head><body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'laporan', 'judul' => $judul]) ?>
 
 <div class="wadah">
-<h1><?= esc($judul) ?></h1>\n<div class="report-actions"><button class="tombol" type="button" onclick="window.print()">Cetak / Simpan PDF</button></div>
+<h1><?= esc($judul) ?></h1>
+<div class="report-actions"><button class="tombol" type="button" onclick="window.print()">Cetak / Simpan PDF</button></div>
 <?php if ($pesan = session()->getFlashdata('error')): ?><p style="background:#fbe5e5;padding:12px"><?= esc($pesan) ?></p><?php endif ?>
 <div class="kotak">
 <form class="filter" method="get" action="<?= site_url('laporan') ?>">
