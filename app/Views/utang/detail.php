@@ -55,6 +55,18 @@ table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px s
 <?php else: ?>
 <p><strong>Hutang sudah lunas.</strong> Tidak ada sisa pembayaran.</p>
 <?php endif ?>
+
+<?php if ((int) $utang['dibatalkan'] === 0 && (int) $utang['total_bayar'] === 0): ?>
+<hr>
+<h4>Batalkan Transaksi</h4>
+<p>Gunakan hanya jika transaksi salah dicatat. Transaksi tidak dihapus agar riwayat tetap tersimpan.</p>
+<form method="post" action="<?= site_url('utang/batalkan/' . $utang['id']) ?>" onsubmit="return confirm('Batalkan transaksi hutang ini?')">
+<?= csrf_field() ?>
+<label for="alasan_batal">Alasan pembatalan *</label>
+<input type="text" id="alasan_batal" name="alasan_batal" maxlength="255" required>
+<button class="tombol" type="submit">Batalkan Transaksi</button>
+</form>
+<?php endif ?>
 </div>
 <p><a class="tombol" href="<?= site_url('utang') ?>">Kembali ke Daftar Hutang</a></p>
 </div></body></html>
