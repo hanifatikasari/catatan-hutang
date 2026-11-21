@@ -3,10 +3,9 @@
  * Caches app shell, manages offline fallbacks, and triggers background sync.
  */
 
-const CACHE_NAME = 'catatan-hutang-v1';
+const CACHE_NAME = 'catatan-hutang-v2';
 
 const STATIC_ASSETS = [
-    '/',
     '/offline.html',
     '/manifest.json',
     '/css/layout.css',
@@ -77,32 +76,18 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // 1. Navigation requests (HTML pages)
+    // 1. Never cache authenticated HTML pages. Cached pages can bypass the
+    // login screen after logout or on a shared device. Private pages use
+    // Cache-Control: no-store on the server as a second layer.
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request)
-                .then(networkResponse => {
-                    // Update cache with fresh version
-                    if (networkResponse && networkResponse.status === 200) {
-                        const responseClone = networkResponse.clone();
-                        caches.open(CACHE_NAME).then(cache => {
-                            cache.put(request, responseClone);
-                        });
-                    }
-                    return networkResponse;
-                })
-                .catch(async () => {
-                    // Network failed: try cache
-                    const cachedResponse = await caches.match(request);
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-                    // If page is not in cache, return dedicated offline page
-                    const offlinePage = await caches.match('/offline.html');
-                    return offlinePage || new Response('Aplikasi sedang offline.', {
-                        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                    });
-                })
+            fetch(request).catch(async () => {
+                const offlinePage = await caches.match('/offline.html');
+                return offlinePage || new Response('Aplikasi sedang offline. Hubungkan internet untuk login.', {
+                    status: 503,
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }
+                });
+            })
         );
         return;
     }
