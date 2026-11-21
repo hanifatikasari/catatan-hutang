@@ -1,8 +1,8 @@
 <?php
 
-namespace App\\Controllers;
+namespace App\Controllers;
 
-use CodeIgniter\\HTTP\\Files\\UploadedFile;
+use CodeIgniter\HTTP\Files\UploadedFile;
 use RuntimeException;
 use Throwable;
 
@@ -58,7 +58,7 @@ class BackupRestore extends BaseController
 
         try {
             $db = db_connect();
-            $sql = \\Config\\Database::utils()->backup([
+            $sql = \Config\Database::utils()->backup([
                 'format' => 'txt',
                 'add_drop' => true,
                 'add_insert' => true,
@@ -98,13 +98,14 @@ class BackupRestore extends BaseController
         }
 
         $sql = file_get_contents($upload->getTempName());
-        if (! is_string($sql) || trim($sql) === '' || ! preg_match('/\\b(CREATE\\s+TABLE|DROP\\s+TABLE)\\b/i', $sql)) {
+        if (! is_string($sql) || trim($sql) === '' || ! preg_match('/\b(CREATE\s+TABLE|DROP\s+TABLE)\b/i', $sql)) {
             return redirect()->to('/backup-restore')->with('error', 'File tidak terlihat seperti backup database SQL.');
         }
 
         try {
-            $statements = $this->validatedBackupStatements($sql);
-            $currentBackup = \\Config\\Database::utils()->backup([
+            $allowedTables = db_connect()->listTables();
+            $statements = $this->validatedBackupStatements($sql, $allowedTables);
+            $currentBackup = \Config\Database::utils()->backup([
                 'format' => 'txt',
                 'add_drop' => true,
                 'add_insert' => true,
@@ -121,7 +122,7 @@ class BackupRestore extends BaseController
                 $this->executeBackupStatements($statements);
             } catch (Throwable $restoreError) {
                 try {
-                    $rollbackStatements = $this->validatedBackupStatements($currentBackup);
+                    $rollbackStatements = $this->validatedBackupStatements($currentBackup, $allowedTables);
                     $this->executeBackupStatements($rollbackStatements);
                 } catch (Throwable $rollbackError) {
                     log_message('critical', 'Restore gagal dan backup pengaman otomatis juga gagal: {message}', ['message' => $rollbackError->getMessage()]);
@@ -160,10 +161,8 @@ class BackupRestore extends BaseController
      *
      * @return list<string>
      */
-    private function validatedBackupStatements(string $sql): array
+    private function validatedBackupStatements(string $sql, array $existingTables): array
     {
-        $db = db_connect();
-        $existingTables = $db->listTables();
         $statements = $this->splitSqlStatements($sql);
         $validated = [];
         $hasCreate = false;
@@ -175,7 +174,7 @@ class BackupRestore extends BaseController
                 continue;
             }
 
-            if (preg_match('/^DROP\\s+TABLE\\s+IF\\s+EXISTS\\s+`?([a-zA-Z0-9_]+)`?$/i', $statement, $match)) {
+            if (preg_match('/^DROP\s+TABLE\s+IF\s+EXISTS\s+`?([a-zA-Z0-9_]+)`?$/i', $statement, $match)) {
                 $table = $match[1];
                 if (! in_array($table, $existingTables, true)) {
                     throw new RuntimeException('Backup memuat tabel yang tidak dikenal.');
@@ -185,7 +184,7 @@ class BackupRestore extends BaseController
                 continue;
             }
 
-            if (preg_match('/^CREATE\\s+TABLE\\s+`?([a-zA-Z0-9_]+)`?\\s*\\(/i', $statement, $match)) {
+            if (preg_match('/^CREATE\s+TABLE\s+`?([a-zA-Z0-9_]+)`?\s*\(/i', $statement, $match)) {
                 $table = $match[1];
                 if (! in_array($table, $existingTables, true)) {
                     throw new RuntimeException('Backup memuat tabel yang tidak dikenal.');
@@ -195,7 +194,7 @@ class BackupRestore extends BaseController
                 continue;
             }
 
-            if (preg_match('/^INSERT\\s+INTO\\s+`?([a-zA-Z0-9_]+)`?\\s*(?:\\([^)]*\\))?\\s+VALUES\\s*\\(/i', $statement, $match)) {
+            if (preg_match('/^INSERT\s+INTO\s+`?([a-zA-Z0-9_]+)`?\s*(?:\([^)]*\))?\s+VALUES\s*\(/i', $statement, $match)) {
                 $table = $match[1];
                 if (! in_array($table, $existingTables, true)) {
                     throw new RuntimeException('Backup memuat tabel yang tidak dikenal.');
@@ -205,7 +204,7 @@ class BackupRestore extends BaseController
             }
 
             // Ignore comments and the FK-check toggles that may be in a dump.
-            if (preg_match('/^SET\\s+(?:SESSION\\s+)?FOREIGN_KEY_CHECKS\\s*=\\s*[01]$/i', $statement)) {
+            if (preg_match('/^SET\s+(?:SESSION\s+)?FOREIGN_KEY_CHECKS\s*=\s*[01]$/i', $statement)) {
                 continue;
             }
 
@@ -226,7 +225,7 @@ class BackupRestore extends BaseController
      */
     private function splitSqlStatements(string $sql): array
     {
-        $sql = preg_replace('/^\\xEF\\xBB\\xBF/', '', $sql) ?? $sql;
+        $sql = preg_replace('/^\xEF\xBB\xBF/', '', $sql) ?? $sql;
         $statements = [];
         $buffer = '';
         $quote = null;
@@ -239,9 +238,9 @@ class BackupRestore extends BaseController
             $next = $i + 1 < $length ? $sql[$i + 1] : '';
 
             if ($lineComment) {
-                if ($char === "\\n") {
+                if ($char === "\n") {
                     $lineComment = false;
-                    $buffer .= "\\n";
+                    $buffer .= "\n";
                 }
                 continue;
             }
@@ -256,7 +255,7 @@ class BackupRestore extends BaseController
 
             if ($quote !== null) {
                 $buffer .= $char;
-                if ($char === '\\\\' && $quote !== '`' && $next !== '') {
+                if ($char === '\\' && $quote !== '`' && $next !== '') {
                     $buffer .= $next;
                     $i++;
                     continue;
@@ -336,9 +335,12 @@ class BackupRestore extends BaseController
             throw new RuntimeException('Tidak dapat membuat folder backup pengaman.');
         }
 
-        file_put_contents($directory . DIRECTORY_SEPARATOR . 'before_restore_latest.sql', $sql, LOCK_EX);
-        @chmod($directory . DIRECTORY_SEPARATOR . 'before_restore_latest.sql', 0600);
+        $backupPath = $directory . DIRECTORY_SEPARATOR . 'before_restore_latest.sql';
+        if (file_put_contents($backupPath, $sql, LOCK_EX) === false) {
+            throw new RuntimeException('Tidak dapat menyimpan backup pengaman.');
+        }
+        @chmod($backupPath, 0600);
         file_put_contents($directory . DIRECTORY_SEPARATOR . 'index.html', '', LOCK_EX);
-        file_put_contents($directory . DIRECTORY_SEPARATOR . '.htaccess', "Require all denied\\nDeny from all\\n", LOCK_EX);
+        file_put_contents($directory . DIRECTORY_SEPARATOR . '.htaccess', "Require all denied\nDeny from all\n", LOCK_EX);
     }
 }
