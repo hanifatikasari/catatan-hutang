@@ -26,13 +26,34 @@ table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px s
 <h3>Total Hutang: Rp<?= number_format((int)$utang['total_hutang'], 0, ',', '.') ?></h3>
 <h3>Total Dibayar: Rp<?= number_format((int)$utang['total_bayar'], 0, ',', '.') ?></h3>
 <h2>Sisa Hutang: Rp<?= number_format((int)$utang['sisa_hutang'], 0, ',', '.') ?></h2>
+<p>Status: <strong><?= (int)$utang['dibatalkan'] === 1 ? 'Dibatalkan' : ((int)$utang['sisa_hutang'] === 0 ? 'Lunas' : ((int)$utang['total_bayar'] > 0 ? 'Dibayar Sebagian' : 'Belum Dibayar')) ?></strong></p>
 </div>
 <div class="kotak"><h3>Riwayat Pembayaran</h3>
 <?php if (empty($pembayaran)): ?><p>Belum ada pembayaran yang dicatat.</p><?php else: ?>
 <table><thead><tr><th>Tanggal</th><th>Jumlah</th><th>Cara</th><th>Catatan</th></tr></thead><tbody>
 <?php foreach ($pembayaran as $b): ?><tr><td><?= esc(date('d-m-Y H:i', strtotime($b['tanggal_bayar']))) ?></td><td>Rp<?= number_format((int)$b['jumlah_bayar'],0,',','.') ?></td><td><?= esc($b['cara_bayar']) ?></td><td><?= esc($b['catatan'] ?? '-') ?></td></tr><?php endforeach ?>
 </tbody></table><?php endif ?>
-<p>Fitur pencatatan pembayaran akan tersedia pada tahap berikutnya.</p>
+<?php if ((int) $utang['dibatalkan'] === 1): ?>
+<p><strong>Transaksi ini dibatalkan.</strong> Pembayaran baru tidak dapat dicatat.</p>
+<?php elseif ((int) $utang['sisa_hutang'] > 0): ?>
+<h4>Catat Pembayaran</h4>
+<form method="post" action="<?= site_url('utang/bayar/' . $utang['id']) ?>">
+<?= csrf_field() ?>
+<label for="tanggal_bayar">Tanggal pembayaran</label>
+<input type="datetime-local" id="tanggal_bayar" name="tanggal_bayar" value="<?= esc(old('tanggal_bayar', date('Y-m-d\TH:i'))) ?>">
+<label for="jumlah_bayar">Jumlah dibayar (Rp)</label>
+<input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" max="<?= (int) $utang['sisa_hutang'] ?>" step="1" required>
+<label for="cara_bayar">Cara pembayaran</label>
+<select id="cara_bayar" name="cara_bayar" required>
+<option value="Tunai">Tunai</option><option value="Transfer">Transfer</option><option value="QRIS">QRIS</option><option value="Lainnya">Lainnya</option>
+</select>
+<label for="catatan_bayar">Catatan</label>
+<input type="text" id="catatan_bayar" name="catatan" maxlength="255">
+<button class="tombol" type="submit" onclick="return confirm('Simpan pembayaran ini?')">Simpan Pembayaran</button>
+</form>
+<?php else: ?>
+<p><strong>Hutang sudah lunas.</strong> Tidak ada sisa pembayaran.</p>
+<?php endif ?>
 </div>
 <p><a class="tombol" href="<?= site_url('utang') ?>">Kembali ke Daftar Hutang</a></p>
 </div></body></html>
