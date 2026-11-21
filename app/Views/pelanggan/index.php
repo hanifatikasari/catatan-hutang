@@ -53,9 +53,7 @@
                         </td>
                         <td>
                             <strong>Rp<?= number_format((int) ($p['total_sisa_hutang'] ?? 0), 0, ',', '.') ?></strong>
-                            <?php if ((int) ($p['total_sisa_hutang'] ?? 0) > 0): ?>
-                                <br><a href="<?= site_url('pelanggan/hutang/' . $p['id']) ?>">Rincian hutang</a>
-                            <?php endif ?>
+                            <br><a href="<?= site_url('pelanggan/hutang/' . $p['id']) ?>">Riwayat hutang</a>
                         </td>
                         <td>
                             <div class="aksi">
