@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="<?= base_url('css/app.css') ?>">
     <link rel="stylesheet" href="<?= base_url('css/pages/utang-form.css') ?>">
     <?= $this->include('layouts/partials/pwa_meta') ?>
+<style>
+.customer-search-wrap input[type=search] { width:100%; box-sizing:border-box; }
+.customer-suggestions { position:absolute; z-index:30; top:100%; left:0; right:0; max-height:260px; overflow-y:auto; background:#fff; border:1px solid #d5e0d8; border-radius:10px; box-shadow:0 8px 24px rgba(20,50,35,.12); }
+.customer-suggestion { display:block; width:100%; padding:11px 13px; text-align:left; border:0; border-bottom:1px solid #edf1ee; background:#fff; color:#203b2b; cursor:pointer; font:inherit; }
+.customer-suggestion:last-child { border-bottom:0; }
+.customer-suggestion:hover, .customer-suggestion:focus { background:#eef6f0; outline:none; }
+.customer-suggestion small { display:block; margin-top:3px; color:#6c7b70; font-size:12px; }
+.customer-search-status { margin-top:5px; font-size:12px; color:#6c7b70; }
+</style>
 </head>
 <body>
 <?= $this->include('layouts/partials/navigation', ['active' => 'utang', 'judul' => $judul]) ?>
@@ -26,16 +35,17 @@
         <form method="post" action="<?= site_url('utang/simpan') ?>">
             <?= csrf_field() ?>
 
-            <div style="margin-bottom: 14px;">
-                <label for="pelanggan_id">Nama Pelanggan *</label>
-                <select id="pelanggan_id" name="pelanggan_id" required>
-                    <option value="">-- Pilih pelanggan --</option>
-                    <?php foreach ($pelanggan as $p): ?>
-                        <option value="<?= $p['id'] ?>" <?= old('pelanggan_id') == $p['id'] ? 'selected' : '' ?>>
-                            <?= esc($p['nama']) ?><?= !empty($p['no_hp']) ? ' (' . esc($p['no_hp']) . ')' : '' ?>
-                        </option>
-                    <?php endforeach ?>
-                </select>
+            <div class="customer-search-wrap" style="margin-bottom: 14px; position: relative;">
+                <label for="pelanggan_search">Nama Pelanggan *</label>
+                <input type="search" id="pelanggan_search" autocomplete="off"
+                    placeholder="Ketik nama atau nomor HP pelanggan..."
+                    aria-autocomplete="list" aria-controls="pelanggan_suggestions"
+                    aria-expanded="false" required
+                    value="<?= esc($pelangganTerpilih['nama'] ?? '') ?>">
+                <input type="hidden" id="pelanggan_id" name="pelanggan_id"
+                    value="<?= esc(old('pelanggan_id', $pelangganTerpilih['id'] ?? '')) ?>">
+                <div id="pelanggan_suggestions" class="customer-suggestions" role="listbox" hidden></div>
+                <div id="pelanggan_search_status" class="customer-search-status" aria-live="polite">Ketik minimal 2 huruf untuk mencari pelanggan.</div>
                 <div style="margin-top: 6px;">
                     <a href="<?= site_url('pelanggan/tambah') ?>" style="font-size: 13px; color: #236940; font-weight: 500;">
                         + Tambah data pelanggan baru
@@ -110,6 +120,7 @@ function tambahBarang() {
 }
 </script>
 <script src="<?= base_url('js/db.js') ?>"></script>
+<script src="<?= base_url('js/customer-search.js') ?>"></script>
 <script src="<?= base_url('js/sync.js') ?>"></script>
 <script src="<?= base_url('js/app.js') ?>"></script>
 </body>
