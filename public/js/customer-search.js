@@ -174,9 +174,20 @@
     });
 
     list.addEventListener('keydown', function (event) {
+        const buttons = Array.from(list.querySelectorAll('.customer-suggestion'));
+        const current = buttons.indexOf(document.activeElement);
+
         if (event.key === 'Escape') {
+            event.preventDefault();
             closeList();
             searchInput.focus();
+        } else if (event.key === 'ArrowDown' && buttons.length) {
+            event.preventDefault();
+            buttons[Math.min(current + 1, buttons.length - 1)].focus();
+        } else if (event.key === 'ArrowUp' && buttons.length) {
+            event.preventDefault();
+            if (current <= 0) searchInput.focus();
+            else buttons[current - 1].focus();
         }
     });
 
