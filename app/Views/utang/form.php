@@ -37,7 +37,7 @@
 
             <div class="customer-search-wrap" style="margin-bottom: 14px; position: relative;">
                 <label for="pelanggan_search">Nama Pelanggan *</label>
-                <input type="search" id="pelanggan_search" autocomplete="off"
+                <input type="search" id="pelanggan_search" data-search-url="<?= site_url('pelanggan/cari-ajax') ?>" autocomplete="off"
                     placeholder="Ketik nama atau nomor HP pelanggan..."
                     aria-autocomplete="list" aria-controls="pelanggan_suggestions"
                     aria-expanded="false" required
