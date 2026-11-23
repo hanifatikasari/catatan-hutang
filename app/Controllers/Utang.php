@@ -52,14 +52,18 @@ class Utang extends BaseController
 
     public function tambah()
     {
-        $pelanggan = $this->pelangganModel
-            ->where('aktif', 1)
-            ->orderBy('nama', 'ASC')
-            ->findAll();
+        $pelangganTerpilih = null;
+        $oldPelangganId = (int) old('pelanggan_id');
+
+        if ($oldPelangganId > 0) {
+            $pelangganTerpilih = $this->pelangganModel
+                ->where('aktif', 1)
+                ->find($oldPelangganId);
+        }
 
         return view('utang/form', [
             'judul' => 'Catat Hutang Baru',
-            'pelanggan' => $pelanggan,
+            'pelangganTerpilih' => $pelangganTerpilih,
         ]);
     }
 
