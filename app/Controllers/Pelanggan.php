@@ -13,6 +13,34 @@ class Pelanggan extends BaseController
         $this->pelangganModel = new PelangganModel();
     }
 
+    /**
+     * AJAX autocomplete pelanggan aktif untuk form transaksi hutang.
+     */
+    public function cariAjax()
+    {
+        $q = trim((string) $this->request->getGet('q'));
+
+        if (mb_strlen($q) < 2) {
+            return $this->response
+                ->setHeader('Cache-Control', 'no-store')
+                ->setJSON(['results' => []]);
+        }
+
+        $results = $this->pelangganModel
+            ->select('id, nama, no_hp')
+            ->where('aktif', 1)
+            ->groupStart()
+                ->like('nama', $q)
+                ->orLike('no_hp', $q)
+            ->groupEnd()
+            ->orderBy('nama', 'ASC')
+            ->findAll(10);
+
+        return $this->response
+            ->setHeader('Cache-Control', 'no-store')
+            ->setJSON(['results' => $results]);
+    }
+
     // Menampilkan daftar pelanggan
     public function index()
     {
