@@ -15,6 +15,7 @@ $routes->group('', ['filter' => 'auth'], static function ($routes) {
 
     $routes->group('pelanggan', static function ($routes) {
         $routes->get('/', 'Pelanggan::index');
+        $routes->get('cari-ajax', 'Pelanggan::cariAjax');
         $routes->get('tambah', 'Pelanggan::tambah');
         $routes->post('simpan', 'Pelanggan::simpan');
         $routes->get('edit/(:num)', 'Pelanggan::edit/$1');
