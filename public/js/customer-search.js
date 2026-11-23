@@ -5,7 +5,7 @@
     const status = document.getElementById('pelanggan_search_status');
     if (!searchInput || !selectedInput || !list || !status) return;
 
-    const endpoint = "<?= site_url('pelanggan/cari-ajax') ?>";
+    const endpoint = <?= json_encode(site_url('pelanggan/cari-ajax')) ?>;
     let debounceTimer = null;
     let requestController = null;
     let activeIndex = -1;
